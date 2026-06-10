@@ -486,7 +486,7 @@ async function doLogin() {
   }
 }
 
-function startSession() {
+function startSession(restored) {
   el('login-shell').classList.add('hidden');
   const initials = session.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
   if (session.role === 'Contractor') {
@@ -526,7 +526,8 @@ function startSession() {
   }
   resetTimer(session.role === 'Contractor' ? 'ct' : 'adm');
   ACTIVITY.forEach(e => document.addEventListener(e, activityHandler, { passive: true }));
-  showToast('Welcome, ' + session.name);
+  if (!restored) showToast('Welcome, ' + session.name);
+  persistSession();
 }
 
 function activityHandler() { if (session) resetTimer(session.role === 'Contractor' ? 'ct' : 'adm'); }
@@ -541,6 +542,7 @@ function resetTimer(prefix) {
 function tickTimer(prefix) {
   const rem = sessionExpiry - Date.now();
   if (rem <= 0) { expireSession(); return; }
+  persistSession();
   const m = Math.floor(rem / 60000), s = Math.floor((rem % 60000) / 1000);
   el(prefix + '-timer-txt').textContent = m + ':' + (s < 10 ? '0' : '') + s;
   if (rem <= WARN_MS) { el(prefix + '-timer-pill').className = 'timer-pill warn'; el(prefix + '-expire').classList.add('show'); }
@@ -550,6 +552,7 @@ function tickTimer(prefix) {
 function expireSession() {
   clearInterval(timerInterval); ACTIVITY.forEach(e => document.removeEventListener(e, activityHandler)); session = null;
   try { localStorage.removeItem('mrdc_safety_auditor'); } catch (_) {}
+  clearPersistedSession();
   el('contractor-shell').classList.add('hidden'); el('admin-shell').classList.add('hidden');
   el('login-shell').classList.remove('hidden'); el('inp-pw').value = '';
   el('login-btn').disabled = false; el('login-btn').innerHTML = '<i class="ti ti-login"></i> Sign in';
@@ -559,6 +562,7 @@ function expireSession() {
 function doLogout() {
   clearInterval(timerInterval); ACTIVITY.forEach(e => document.removeEventListener(e, activityHandler)); session = null;
   try { localStorage.removeItem('mrdc_safety_auditor'); } catch (_) {}
+  clearPersistedSession();
   el('contractor-shell').classList.add('hidden'); el('admin-shell').classList.add('hidden');
   el('login-shell').classList.remove('hidden'); el('inp-user').value = ''; el('inp-pw').value = '';
   hideErr(); showToast('Signed out successfully');
@@ -1356,6 +1360,27 @@ async function removeUser(id, name) {
     showToast(name + ' removed');
   } catch (e) { showToast(e.message || 'Failed to remove user', true); }
 }
+// ── Session persistence ──────────────────────────────────────────────
+// Keeps the login across in-app navigation (e.g. the Work Zone form's
+// "Safety Home" button) without forcing a re-login. Stored in sessionStorage,
+// so it clears when the tab closes; the 30-min inactivity timeout still applies
+// via the saved expiry.
+function persistSession() {
+  try { if (session) sessionStorage.setItem('mrdc_safety_session', JSON.stringify({ s: session, exp: sessionExpiry })); } catch (_) {}
+}
+function clearPersistedSession() {
+  try { sessionStorage.removeItem('mrdc_safety_session'); } catch (_) {}
+}
+(function tryRestoreSession() {
+  try {
+    const raw = sessionStorage.getItem('mrdc_safety_session');
+    if (!raw) return;
+    const o = JSON.parse(raw);
+    if (!o || !o.s || !o.exp || Date.now() >= o.exp) { clearPersistedSession(); return; }
+    session = o.s;
+    startSession(true);   // restored — skip the welcome toast, refresh the timer
+  } catch (_) { clearPersistedSession(); }
+})();
 </script>
 </body>
 </html>
