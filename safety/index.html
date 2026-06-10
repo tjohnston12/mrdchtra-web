@@ -262,8 +262,14 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
     </div>
   </div>
   <div class="expire-banner" id="adm-expire"><i class="ti ti-alert-triangle" style="font-size:15px;flex-shrink:0" aria-hidden="true"></i><span>Session expiring soon.</span><button class="btn-sm" style="margin-left:auto" onclick="resetTimer('adm')">Stay signed in</button></div>
+  <div class="card" id="online-forms-section" style="padding:1rem 1.25rem;display:none">
+    <div class="section-label"><i class="ti ti-forms" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>Online Forms</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:0.75rem">
+      <a id="audit-launch" href="highway-work-zone-audit.html" style="display:none;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;background:#E8772E;color:#fff;border:0.5px solid #E8772E;transition:background 0.15s" onmouseover="this.style.background='#C2611F'" onmouseout="this.style.background='#E8772E'"><i class="ti ti-clipboard-check" style="font-size:15px" aria-hidden="true"></i> Work Zone Audit</a>
+    </div>
+  </div>
   <div class="card" style="padding:1rem 1.25rem">
-    <div class="section-label"><i class="ti ti-filter" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>Filters</div>
+    <div class="section-label"><i class="ti ti-filter" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>Contractor Hours filters</div>
     <div class="filter-grid">
       <select id="f-ct" onchange="applyFilters()"><option value="">All contractors</option></select>
       <select id="f-zone" onchange="applyFilters()"><option value="">All zones</option></select>
@@ -280,7 +286,6 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
     <div class="metric"><div class="metric-label">Zones active</div><div class="metric-value" id="m-zones">—</div></div>
   </div>
   <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-bottom:1rem">
-    <a id="audit-launch" href="highway-work-zone-audit.html" style="display:none;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;background:#E8772E;color:#fff;border:0.5px solid #E8772E;transition:background 0.15s" onmouseover="this.style.background='#C2611F'" onmouseout="this.style.background='#E8772E'"><i class="ti ti-clipboard-check" style="font-size:15px" aria-hidden="true"></i> Work Zone Audit</a>
     <button class="btn-sm" onclick="loadAdminData()"><i class="ti ti-refresh" style="font-size:13px" aria-hidden="true"></i> Refresh data</button>
   </div>
   <div class="tabs">
@@ -507,6 +512,7 @@ function startSession() {
     // Work Zone Audit launcher — visible to anyone granted "Audits" access, plus admins
     if ((session.appAccess || []).includes('Audits') || session.role === 'Admin') {
       const auditLaunch = el('audit-launch'); if (auditLaunch) auditLaunch.style.display = 'inline-flex';
+      const onlineForms = el('online-forms-section'); if (onlineForms) onlineForms.style.display = '';
     }
     const rb = el('adm-role-badge'); rb.textContent = session.role;
     rb.className = 'role-badge ' + (session.role === 'Admin' ? 'rb-admin' : 'rb-viewer');
@@ -1054,7 +1060,21 @@ function statusBadge(uploadedAt) {
 }
 
 // ── DOCUMENTS ──
-const UPLOAD_URL = 'https://mrdc-htra.com/safety/upload.php';
+// Contractor documents upload straight to Cloudinary (unsigned, direct from the browser).
+// Same Cloudinary account as the audit form. The unsigned preset MUST allow image AND raw
+// resource types, or PDFs / Word / Excel will be rejected — /auto/upload routes by file type.
+const CLOUDINARY_CLOUD_NAME = 'djrqifos6';
+const CLOUDINARY_UPLOAD_PRESET = 'uzh72cqd';
+async function uploadToCloudinary(file, folder) {
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  fd.append('folder', folder);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`, { method: 'POST', body: fd });
+  const j = await res.json().catch(() => ({}));
+  if (!res.ok || !j.secure_url) throw new Error((j.error && j.error.message) || ('Cloudinary upload failed (' + res.status + ')'));
+  return j.secure_url;
+}
 const DOC_SLOTS = [
   { id: 'slot1', label: 'Document 1' },
   { id: 'slot2', label: 'Document 2' },
@@ -1090,16 +1110,8 @@ async function uploadDoc(slotId, slotLabel) {
   statusEl.style.color = '#666';
 
   try {
-    // Step 1 — upload file to Bluehost
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('contractorId', session.recordId);
-    formData.append('slot', slotId);
-
-    const uploadResp = await fetch(UPLOAD_URL, { method: 'POST', body: formData });
-    if (!uploadResp.ok) throw new Error('Upload failed');
-    const uploadData = await uploadResp.json();
-    if (!uploadData.success) throw new Error(uploadData.error || 'Upload failed');
+    // Step 1 — upload file to Cloudinary (folder per contractor)
+    const fileUrl = await uploadToCloudinary(file, `contractor-docs/${session.recordId || 'unknown'}`);
 
     // Step 2 — save record to Airtable via Vercel
     await api('/api/documents', {
@@ -1110,7 +1122,7 @@ async function uploadDoc(slotId, slotLabel) {
         company: session.company || '',
         slot: slotId,
         slotLabel,
-        url: uploadData.url,
+        url: fileUrl,
         filename: file.name,
         size: file.size
       })
@@ -1118,7 +1130,7 @@ async function uploadDoc(slotId, slotLabel) {
 
     const uploadedAt = new Date().toISOString();
     const s = getDocStatus(uploadedAt);
-    statusEl.innerHTML = `<i class="ti ti-check" style="color:#C2611F"></i> <a href="${uploadData.url}" target="_blank" style="color:#C2611F;text-decoration:none">${file.name}</a> — uploaded ${new Date().toLocaleDateString()} &nbsp;${statusBadge(uploadedAt)}`;
+    statusEl.innerHTML = `<i class="ti ti-check" style="color:#C2611F"></i> <a href="${fileUrl}" target="_blank" style="color:#C2611F;text-decoration:none">${file.name}</a> — uploaded ${new Date().toLocaleDateString()} &nbsp;${statusBadge(uploadedAt)}`;
     statusEl.style.color = '#C2611F';
     showToast('Document uploaded ✓');
     loadCtDocHistory();
