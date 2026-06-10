@@ -471,6 +471,8 @@ async function doLogin() {
       body: JSON.stringify({ username, password })
     });
     session = { ...data.user, token: data.token, expiresAt: data.expiresAt };
+    // Hand the signed-in identity to the Work Zone Audit form (separate page, same origin).
+    try { localStorage.setItem('mrdc_safety_auditor', JSON.stringify({ name: session.name || '', email: session.email || '', exp: session.expiresAt || 0 })); } catch (_) {}
     hideErr(); el('inp-pw').value = '';
     startSession();
   } catch (e) {
@@ -541,6 +543,7 @@ function tickTimer(prefix) {
 
 function expireSession() {
   clearInterval(timerInterval); ACTIVITY.forEach(e => document.removeEventListener(e, activityHandler)); session = null;
+  try { localStorage.removeItem('mrdc_safety_auditor'); } catch (_) {}
   el('contractor-shell').classList.add('hidden'); el('admin-shell').classList.add('hidden');
   el('login-shell').classList.remove('hidden'); el('inp-pw').value = '';
   el('login-btn').disabled = false; el('login-btn').innerHTML = '<i class="ti ti-login"></i> Sign in';
@@ -549,6 +552,7 @@ function expireSession() {
 
 function doLogout() {
   clearInterval(timerInterval); ACTIVITY.forEach(e => document.removeEventListener(e, activityHandler)); session = null;
+  try { localStorage.removeItem('mrdc_safety_auditor'); } catch (_) {}
   el('contractor-shell').classList.add('hidden'); el('admin-shell').classList.add('hidden');
   el('login-shell').classList.remove('hidden'); el('inp-user').value = ''; el('inp-pw').value = '';
   hideErr(); showToast('Signed out successfully');
