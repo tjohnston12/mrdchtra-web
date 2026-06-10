@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MRDC Operations Corporation</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      background: #0c1120;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /* subtle road-stripe background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          transparent 0px,
+          transparent 58px,
+          rgba(255,255,255,0.02) 58px,
+          rgba(255,255,255,0.02) 60px
+        );
+      pointer-events: none;
+    }
+
+    .card {
+      background: #111827;
+      border: 1px solid #1e2e4a;
+      border-radius: 20px;
+      padding: 3.5rem 3.5rem 2.75rem;
+      max-width: 500px;
+      width: 92%;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* amber accent bar — picks up the sun colour from the sub-app logo */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #2a3a6e, #f5a623, #2a3a6e);
+    }
+
+    /* ── MRDC Logo ── */
+    .logo {
+      margin: 0 auto 2rem;
+      /* white bg so the navy logo reads clearly on dark card */
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 1.25rem 1.75rem;
+      display: inline-block;
+      max-width: 280px;
+    }
+
+    .logo img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* ── Text ── */
+    .welcome-label {
+      font-size: 11px;
+      color: #5a7a9a;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .welcome-text {
+      font-size: 15px;
+      color: #8fafc8;
+      line-height: 1.8;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+
+    .divider {
+      width: 48px;
+      height: 1px;
+      background: #1e2e4a;
+      margin: 1.75rem auto;
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 2.25rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid #1a2540;
+      font-size: 10.5px;
+      color: #2e4460;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="card">
+
+    <div class="logo">
+      <img src="MRDC-Logo-Big.jpg" alt="MRDC Operations Corporation" />
+    </div>
+
+    <p class="welcome-label">Internal Portal</p>
+
+    <div class="divider"></div>
+
+    <p class="welcome-text">
+      Welcome to the MRDC Operations Corporation portal.
+      Please use the application links provided to you to access
+      the tools and services available on this site.
+    </p>
+
+    <footer>
+      www.mrdc-htra &nbsp;&middot;&nbsp; &copy; 2026 MRDC Operations Corporation
+    </footer>
+
+  </main>
+
+</body>
+</html>
