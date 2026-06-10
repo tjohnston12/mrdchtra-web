@@ -942,7 +942,8 @@ function renderContractorList() {
         <div style="font-size:12px;color:#666">${c.company}${c.email?' · '+c.email:''}${c.phone?' · '+c.phone:''}</div>
       </div>
       ${c.active===false?'<span style="font-size:11px;background:#EDF1F6;color:#999;padding:2px 8px;border-radius:99px;font-weight:500">Inactive</span>':''}
-      <div style="display:flex;gap:6px;flex-shrink:0">
+      <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end">
+        ${c.email ? `<a class="btn-sm" href="mailto:${c.email}" style="text-decoration:none;border-color:#1B4F8A;color:#1B4F8A" title="Send email"><i class="ti ti-mail" style="font-size:13px"></i> Email</a>` : ''}
         <button class="btn-sm" onclick="openEditModal('${c.id}')"><i class="ti ti-edit" style="font-size:13px"></i> Edit</button>
         ${c.active!==false
           ? `<button class="btn-sm danger" onclick="toggleActive('${c.id}',false)"><i class="ti ti-user-off" style="font-size:13px"></i> Deactivate</button>`
