@@ -53,6 +53,7 @@
   <div class="tabs">
     <button class="tab active" onclick="switchTab('contractors')"><i class="ti ti-users" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>By contractor</button>
     <button class="tab" onclick="switchTab('entries')"><i class="ti ti-list" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>All entries</button>
+    <button class="tab" onclick="switchTab('documents')"><i class="ti ti-files" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>Documents</button>
   </div>
 
   <div id="view-contractors" class="view active">
@@ -68,6 +69,36 @@
       </table>
     </div>
   </div>
+
+  <div id="view-documents" class="view">
+    <div class="card" style="padding:1rem 1.25rem">
+      <div class="section-label" style="margin-bottom:0.5rem">Filter by contractor</div>
+      <select id="doc-filter-ct" onchange="loadAdminDocs()" style="width:100%;padding:8px 10px;border:0.5px solid #ccc;border-radius:8px;font-size:13px;background:#fff;color:#15243B">
+        <option value="">All contractors</option>
+      </select>
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+        <div class="section-label" style="margin-bottom:0">All documents</div>
+        <button class="btn-sm" onclick="loadAdminDocs()"><i class="ti ti-refresh" style="font-size:13px" aria-hidden="true"></i> Refresh</button>
+      </div>
+      <div id="adm-doc-summary" style="display:none;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem">
+        <div style="padding:8px 12px;background:#FCEEE1;border-radius:8px;border:0.5px solid #6FCF97;text-align:center">
+          <div style="font-size:20px;font-weight:500;color:#8A4A12" id="doc-count-current">0</div>
+          <div style="font-size:11px;color:#8A4A12">Current</div>
+        </div>
+        <div style="padding:8px 12px;background:#FAEEDA;border-radius:8px;border:0.5px solid #EF9F27;text-align:center">
+          <div style="font-size:20px;font-weight:500;color:#633806" id="doc-count-expiring">0</div>
+          <div style="font-size:11px;color:#633806">Expiring soon</div>
+        </div>
+        <div style="padding:8px 12px;background:#FCEBEB;border-radius:8px;border:0.5px solid #F09595;text-align:center">
+          <div style="font-size:20px;font-weight:500;color:#A32D2D" id="doc-count-expired">0</div>
+          <div style="font-size:11px;color:#A32D2D">Expired</div>
+        </div>
+      </div>
+      <div id="adm-doc-list"><div class="empty"><i class="ti ti-files" aria-hidden="true"></i>Loading…</div></div>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -76,12 +107,14 @@
 <script>
 // ── Contractor Hours — review logic ──
 let allRecords = [], allContractors = {}, filteredRecords = [];
+let docsLoaded = false;
 
 function switchTab(tab){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active');
   el('view-'+tab).classList.add('active');
+  if(tab==='documents' && !docsLoaded){ docsLoaded = true; loadAdminDocs(); }
 }
 
 async function loadAdminData(){
@@ -204,9 +237,80 @@ function renderEntries(){
   </tr>`).join('');
 }
 
+// ── Documents (ported from the dashboard; reads /api/documents) ──
+function getDocStatus(uploadedAt){
+  if(!uploadedAt) return null;
+  const expiry = new Date(uploadedAt); expiry.setFullYear(expiry.getFullYear()+1);
+  const daysLeft = Math.ceil((expiry - new Date())/(1000*60*60*24));
+  if(daysLeft < 0) return { label:'Expired', color:'#A32D2D', bg:'#FCEBEB', border:'#F09595', days:daysLeft };
+  if(daysLeft <= 30) return { label:`Expires in ${daysLeft}d`, color:'#633806', bg:'#FAEEDA', border:'#EF9F27', days:daysLeft };
+  return { label:`Valid — expires ${expiry.toLocaleDateString()}`, color:'#8A4A12', bg:'#FCEEE1', border:'#6FCF97', days:daysLeft };
+}
+function statusBadge(uploadedAt){
+  const s = getDocStatus(uploadedAt); if(!s) return '';
+  return `<span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:99px;background:${s.bg};color:${s.color};border:0.5px solid ${s.border}">${s.label}</span>`;
+}
+let docFilterPopulated = false;
+function populateDocFilter(records){
+  const sel = el('doc-filter-ct'); if(!sel) return;
+  const seen = new Set([...sel.options].map(o=>o.value));
+  const cts = {};
+  records.forEach(r=>{ const f=r.fields||{}; const id=f['Contractor ID']; if(id && !cts[id]) cts[id]={ id, name:f['Contractor Name']||id, company:f['Company']||'' }; });
+  Object.values(cts).sort((a,b)=>(a.name||'').localeCompare(b.name||'')).forEach(c=>{
+    if(!seen.has(c.id)){ const o=document.createElement('option'); o.value=c.id; o.textContent=c.name+(c.company?' — '+c.company:''); sel.appendChild(o); }
+  });
+}
+async function loadAdminDocs(){
+  const listEl = el('adm-doc-list');
+  listEl.innerHTML = '<div class="empty"><i class="ti ti-loader"></i>Loading…</div>';
+  const ctFilter = el('doc-filter-ct') ? el('doc-filter-ct').value : '';
+  try{
+    const url = ctFilter ? `/api/documents?contractorId=${encodeURIComponent(ctFilter)}` : '/api/documents?all=true';
+    const data = await api(url);
+    if(!docFilterPopulated && !ctFilter){ populateDocFilter(data.records||[]); docFilterPopulated = true; }
+    if(!data.records || !data.records.length){
+      const summ = el('adm-doc-summary'); if(summ) summ.style.display = 'none';
+      listEl.innerHTML = '<div class="empty"><i class="ti ti-files"></i>No documents uploaded yet</div>'; return;
+    }
+    const grouped = {};
+    data.records.forEach(r=>{ const f=r.fields; const key=f['Contractor Name']||f['Contractor ID']||'Unknown';
+      if(!grouped[key]) grouped[key]={ company:f['Company']||'', docs:[] }; grouped[key].docs.push(f); });
+    let current=0, expiring=0, expired=0;
+    data.records.forEach(r=>{ const s=getDocStatus(r.fields['Uploaded At']); if(!s) return;
+      if(s.days<0) expired++; else if(s.days<=30) expiring++; else current++; });
+    const summary = el('adm-doc-summary');
+    if(summary){ summary.style.display='grid';
+      el('doc-count-current').textContent=current; el('doc-count-expiring').textContent=expiring; el('doc-count-expired').textContent=expired; }
+    listEl.innerHTML = Object.entries(grouped).map(([name,val])=>`
+      <div style="margin-bottom:1rem">
+        <div style="font-size:13px;font-weight:500;margin-bottom:6px;padding-bottom:6px;border-bottom:0.5px solid #D6DFEA">
+          ${name} <span style="font-size:12px;color:#666;font-weight:400">${val.company?'— '+val.company:''}</span>
+        </div>
+        ${val.docs.map(f=>{
+          const date=f['Uploaded At']?new Date(f['Uploaded At']).toLocaleDateString():'—';
+          const size=f['File Size']?(f['File Size']/1024).toFixed(0)+' KB':'';
+          return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px;flex-wrap:wrap">
+            <i class="ti ti-file" style="font-size:16px;color:#1B4F8A;flex-shrink:0"></i>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f['Document Label']||f['Document Slot']||'—'}</div>
+              <div style="font-size:12px;color:#666;margin-bottom:3px">${f['File Name']||'—'} · ${size} · ${date}</div>
+              ${statusBadge(f['Uploaded At'])}
+            </div>
+            <a href="${f['File URL']}" target="_blank" class="btn-sm" style="flex-shrink:0"><i class="ti ti-download" style="font-size:13px"></i> Download</a>
+          </div>`;
+        }).join('')}
+      </div>`).join('');
+  }catch(e){
+    const summ = el('adm-doc-summary'); if(summ) summ.style.display='none';
+    listEl.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Could not load documents</div>';
+  }
+}
+
 // ── Boot ──
 if (initShell({ subtitle: 'Review submissions', allow: s => s.role !== 'Contractor' })) {
   loadAdminData();
+  const h = (location.hash || '').replace('#','');
+  if (h === 'entries' || h === 'documents' || h === 'contractors') switchTab(h);
 }
 </script>
 </body>
