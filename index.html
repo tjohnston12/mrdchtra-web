@@ -99,6 +99,60 @@
       margin: 1.75rem auto;
     }
 
+    /* ── App login shortcuts ── */
+    .app-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      max-width: 340px;
+      margin: 2rem auto 0;
+    }
+
+    .app-btn {
+      display: block;
+      padding: 0.95rem 1.25rem;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .app-btn small {
+      display: block;
+      font-weight: normal;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      opacity: 0.72;
+      margin-top: 3px;
+    }
+
+    .app-btn:hover { transform: translateY(-1px); }
+
+    /* Employee — navy blue */
+    .app-btn-employee {
+      background: #1c2c52;
+      color: #d3e2f6;
+      border-color: #2a3a6e;
+    }
+    .app-btn-employee:hover {
+      background: #233a6e;
+      box-shadow: 0 6px 18px rgba(42,58,110,0.45);
+    }
+
+    /* Safety — amber */
+    .app-btn-safety {
+      background: #f5a623;
+      color: #19120a;
+      border-color: #f5a623;
+    }
+    .app-btn-safety:hover {
+      background: #ffb845;
+      box-shadow: 0 6px 18px rgba(245,166,35,0.35);
+    }
+
     /* ── Footer ── */
     footer {
       margin-top: 2.25rem;
@@ -124,12 +178,25 @@
 
     <p class="welcome-text">
       Welcome to the MRDC Operations Corporation portal.
-      Please use the application links provided to you to access
+      Please use the application links below to access
       the tools and services available on this site.
     </p>
 
+    <nav class="app-links">
+      <!-- Employee Directory login. Confirm/replace the URL if the app lives elsewhere. -->
+      <a class="app-btn app-btn-employee" href="https://mrdc-employees-api.vercel.app">
+        Employee Directory
+        <small>Staff login &rarr;</small>
+      </a>
+      <!-- Safety App login. Confirm/replace the URL if the path differs. -->
+      <a class="app-btn app-btn-safety" href="https://www.mrdc-htra.com/safety/">
+        Safety App
+        <small>Staff login &rarr;</small>
+      </a>
+    </nav>
+
     <footer>
-      www.mrdc-htra &nbsp;&middot;&nbsp; &copy; 2026 MRDC Operations Corporation
+      www.mrdc-htra.com &nbsp;&middot;&nbsp; &copy; 2026 MRDC Operations Corporation
     </footer>
 
   </main>
