@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAzMiAzMic+PHJlY3Qgd2lkdGg9JzMyJyBoZWlnaHQ9JzMyJyByeD0nNicgZmlsbD0nIzFCNEY4QScvPjx0ZXh0IHg9JzE2JyB5PScyMicgZm9udC1mYW1pbHk9J0dlb3JnaWEsc2VyaWYnIGZvbnQtc2l6ZT0nMTYnIGZvbnQtd2VpZ2h0PSdib2xkJyBmaWxsPScjRTg3NzJFJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJz5NPC90ZXh0Pjwvc3ZnPg==">
+<title>Work Zone Field Audit — MRDC Safety</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  /* Brand — blue primary, orange hi-vis accent (the safety app's identity) */
+  --blue:#1B4F8A;
+  --blue-light:#2E6DB4;
+  --blue-dark:#143C6B;
+  --orange:#E8772E;
+  --orange-light:#F4A15C;
+  --orange-soft:#FCEEE1;
+  /* Neutrals — cool tones, so the safety app reads differently from the directory */
+  --bg:#EDF1F6;
+  --paper:#FFFFFF;
+  --ink:#15243B;
+  --muted:#5E6B80;
+  --line:#D6DFEA;
+  --concrete:#E8EDF4;
+  /* Semantic — pass / fail stay independent of the orange accent */
+  --pass:#0F6E56; --pass-soft:#E3F3EC;
+  --fail:#A32D2D; --fail-soft:#FBEBEB;
+  --amber:#C77B0A; --amber-soft:#FAF0DA;
+  --na:#6B7686; --na-soft:#EDF0F5;
+  --shadow:0 1px 2px rgba(20,40,70,.05),0 2px 10px rgba(20,40,70,.06);
+  --radius:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:'DM Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  color:var(--ink);
+  background:var(--bg);
+  line-height:1.5;
+  padding-bottom:96px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:760px;margin:0 auto;padding:0 14px}
+
+/* ---- Top banner ---- */
+.banner{background:var(--blue);color:#fff;border-bottom:4px solid var(--orange);padding:18px 0 16px}
+.banner .wrap{display:flex;align-items:center;gap:14px}
+.chevrons{
+  width:44px;height:44px;flex:0 0 44px;border-radius:10px;
+  background:repeating-linear-gradient(135deg,var(--orange) 0 8px,#fff 8px 16px);
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.25);
+}
+.banner h1{font-family:'DM Serif Display',Georgia,serif;font-weight:400;letter-spacing:.2px;font-size:1.5rem;margin:0;line-height:1.05}
+.banner .sub{font-size:.76rem;color:rgba(255,255,255,.72);letter-spacing:.2px;margin-top:4px}
+.banner .org{margin-left:auto;text-align:right;font-size:.62rem;font-weight:600;color:rgba(255,255,255,.6);letter-spacing:1.5px}
+.banner .home-btn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font:inherit;font-size:.74rem;font-weight:600;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:7px 12px;letter-spacing:.2px;white-space:nowrap;transition:background .15s}
+.banner .home-btn:hover{background:rgba(255,255,255,.26)}
+@media(max-width:520px){.banner .home-btn span{display:none}.banner .home-btn{padding:7px 9px}}
+
+/* ---- Live status bar ---- */
+.statusbar{position:sticky;top:0;z-index:40;background:var(--paper);border-bottom:1px solid var(--line);box-shadow:0 2px 8px rgba(20,40,70,.06)}
+.statusbar .wrap{display:flex;align-items:center;gap:12px;padding:9px 14px}
+.gauge{flex:0 0 auto;display:flex;align-items:baseline;gap:6px;color:var(--ink)}
+.gauge .pct{font-family:'DM Serif Display',Georgia,serif;font-size:1.5rem;line-height:1;color:var(--blue)}
+.gauge .lbl{font-size:.6rem;letter-spacing:1px;color:var(--muted);text-transform:uppercase;font-weight:600}
+.track{flex:1;height:9px;border-radius:6px;background:var(--concrete);overflow:hidden}
+.fill{height:100%;width:0;background:var(--pass);transition:width .35s ease,background .35s ease;border-radius:6px}
+.verdict{flex:0 0 auto;font-weight:600;font-size:.68rem;letter-spacing:.4px;text-transform:uppercase;padding:5px 10px;border-radius:999px;background:var(--concrete);color:var(--muted);white-space:nowrap}
+.counts{flex:0 0 auto;font-size:.66rem;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* ---- Cards ---- */
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin:14px 0;overflow:hidden}
+.card-head{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;user-select:none}
+.card-head .idx{font-size:.7rem;font-weight:700;color:var(--orange);background:var(--orange-soft);padding:3px 8px;border-radius:6px;flex:0 0 auto;min-width:26px;text-align:center;letter-spacing:.3px}
+.card-head h2{font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:1.12rem;margin:0;flex:1;color:var(--ink);letter-spacing:.2px}
+.card-head .prog{font-size:.72rem;color:var(--muted);flex:0 0 auto;font-variant-numeric:tabular-nums}
+.card-head .chev{flex:0 0 auto;color:var(--muted);transition:transform .25s ease;font-size:.7rem}
+.card.collapsed .card-head .chev{transform:rotate(-90deg)}
+.card-body{padding:0 16px 6px}
+.card.collapsed .card-body{display:none}
+
+.intro{font-size:.8rem;color:var(--muted);margin:0 0 10px;padding:9px 12px;background:var(--concrete);border-radius:9px;border-left:3px solid var(--orange)}
+
+/* ---- Audit info fields ---- */
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:4px 0 14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field.full{grid-column:1/-1}
+.field label{font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.field input,.field select,.field textarea{font:inherit;font-size:.92rem;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);width:100%;transition:border-color .15s}
+.field input:focus,.field select:focus,.field textarea:focus,.note:focus{outline:none;border-color:var(--blue)}
+.field textarea{resize:vertical;min-height:60px}
+
+/* ---- Checklist items ---- */
+.item{padding:13px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:none}
+.item .q{display:flex;gap:9px;align-items:flex-start;margin-bottom:9px}
+.item .qtext{flex:1;font-size:.93rem;font-weight:500;color:var(--ink)}
+.item .ref{display:inline-block;font-size:.62rem;font-weight:600;color:var(--blue);background:#EAF1F9;padding:2px 7px;border-radius:5px;margin-top:6px;letter-spacing:.03em;text-transform:uppercase}
+.seg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.seg button{font:inherit;font-weight:600;font-size:.82rem;padding:11px 6px;border:1.5px solid var(--line);background:#fff;color:var(--muted);border-radius:9px;cursor:pointer;transition:all .12s ease;letter-spacing:.2px}
+.seg button:active{transform:scale(.97)}
+.seg button[data-v="pass"].on{background:var(--pass-soft);border-color:var(--pass);color:var(--pass)}
+.seg button[data-v="fail"].on{background:var(--fail-soft);border-color:var(--fail);color:var(--fail)}
+.seg button[data-v="na"].on{background:var(--na-soft);border-color:var(--na);color:var(--ink)}
+.item.flag-fail{background:var(--fail-soft);margin:0 -16px;padding-left:16px;padding-right:16px;border-radius:8px}
+.followup{margin-top:10px;display:none}
+.item.show-follow .followup{display:block}
+.note{font:inherit;font-size:.88rem;width:100%;padding:10px 11px;border:1.5px solid var(--line);border-radius:8px;resize:vertical;min-height:52px;color:var(--ink)}
+.note.required-empty{border-color:var(--fail);background:var(--fail-soft)}
+.photo-row{display:flex;align-items:center;gap:9px;margin-top:8px;flex-wrap:wrap}
+.photo-btn{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:.78rem;font-weight:600;color:var(--blue);background:#fff;border:1.5px dashed var(--line);border-radius:9px;padding:8px 12px;cursor:pointer}
+.photo-btn:hover{border-color:var(--blue)}
+.photo-btn svg{width:15px;height:15px}
+.thumbs{display:flex;gap:6px;flex-wrap:wrap}
+.thumbs img{width:42px;height:42px;object-fit:cover;border-radius:7px;border:1px solid var(--line)}
+.thumb-pending{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:7px;border:1px dashed var(--line);color:var(--muted);font-size:.9rem}
+
+/* ---- Warning sign distance table ---- */
+.dist-table{width:100%;border-collapse:collapse;margin:6px 0 12px;font-size:.85rem}
+.dist-table th,.dist-table td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line)}
+.dist-table th{font-weight:600;text-transform:uppercase;font-size:.66rem;letter-spacing:.05em;color:var(--muted);background:var(--concrete)}
+.dist-table tr.active td{background:var(--orange-soft);font-weight:700;color:var(--blue-dark)}
+.dist-table td:first-child{font-variant-numeric:tabular-nums;font-weight:500}
+.req-callout{font-size:.82rem;background:var(--orange-soft);border:1px solid var(--orange-light);border-radius:9px;padding:10px 12px;margin:0 0 12px;color:var(--ink)}
+.req-callout b{color:var(--blue-dark)}
+
+/* ---- Deficiency summary ---- */
+.def-empty{font-size:.82rem;color:var(--muted);padding:14px;text-align:center;background:var(--concrete);border-radius:9px}
+.def{border-left:4px solid var(--fail);background:var(--fail-soft);border-radius:9px;padding:11px 13px;margin:9px 0}
+.def .dh{font-weight:600;font-size:.88rem;margin-bottom:3px;color:var(--ink)}
+.def .dsrc{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;font-weight:600}
+.def .dnote{font-size:.84rem;color:var(--ink)}
+.def-action{margin-top:10px;display:grid;grid-template-columns:1fr auto;gap:8px}
+.def-action input{font:inherit;font-size:.84rem;padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+.def-action select{font:inherit;font-size:.82rem;padding:9px;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+.def-action input:focus,.def-action select:focus{outline:none;border-color:var(--blue)}
+
+/* ---- Rating ---- */
+.rate-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px 0 12px}
+.rate-grid button{font:inherit;font-weight:600;font-size:.84rem;padding:13px 8px;border:1.5px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;color:var(--ink);transition:all .12s}
+.rate-grid button:active{transform:scale(.98)}
+.rate-grid button.on[data-r="full"]{background:var(--pass-soft);border-color:var(--pass);color:var(--pass)}
+.rate-grid button.on[data-r="minor"]{background:var(--amber-soft);border-color:var(--amber);color:#8a5600}
+.rate-grid button.on[data-r="major"]{background:var(--orange-soft);border-color:var(--orange);color:var(--orange)}
+.rate-grid button.on[data-r="stop"]{background:var(--fail-soft);border-color:var(--fail);color:var(--fail)}
+
+/* ---- Action bar ---- */
+.actionbar{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(255,255,255,.97);backdrop-filter:blur(6px);border-top:1px solid var(--line);box-shadow:0 -2px 12px rgba(20,40,70,.06);padding:11px 14px calc(11px + env(safe-area-inset-bottom))}
+.actionbar .wrap{display:flex;gap:10px;align-items:center}
+.btn{font:inherit;font-weight:600;font-size:.9rem;border-radius:10px;padding:13px 16px;cursor:pointer;border:none;letter-spacing:.2px}
+.btn-ghost{background:var(--concrete);color:var(--ink);flex:0 0 auto}
+.btn-ghost:hover{background:#dce3ed}
+.btn-primary{background:var(--orange);color:#fff;flex:1;box-shadow:0 2px 10px rgba(232,119,46,.35)}
+.btn-primary:hover{background:#d96a22}
+.btn-primary:active,.btn-ghost:active{transform:translateY(1px)}
+
+/* ---- Report overlay ---- */
+.overlay{position:fixed;inset:0;z-index:100;background:rgba(20,40,70,.5);display:none;align-items:flex-start;justify-content:center;padding:20px 12px;overflow:auto;backdrop-filter:blur(2px)}
+.overlay.open{display:flex}
+.report{background:#fff;max-width:760px;width:100%;border-radius:16px;padding:0;box-shadow:0 24px 64px rgba(0,0,0,.25)}
+.report-bar{position:sticky;top:0;background:#fff;display:flex;gap:8px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--line);border-radius:16px 16px 0 0}
+.report-bar h3{font-family:'DM Serif Display',Georgia,serif;font-weight:400;margin:0;flex:1;font-size:1.15rem;color:var(--ink)}
+.report-bar .x{background:var(--concrete);border:none;border-radius:8px;width:34px;height:34px;font-size:1.1rem;cursor:pointer;color:var(--ink)}
+.report-body{padding:18px 22px 26px}
+
+@media (max-width:520px){
+  .fields{grid-template-columns:1fr}
+  .rate-grid{grid-template-columns:1fr}
+  .banner h1{font-size:1.25rem}
+  .verdict{display:none}
+}
+
+/* ---- Print ---- */
+@media print{
+  body{background:#fff;padding:0}
+  .banner,.statusbar,.actionbar,.card,.report-bar{display:none!important}
+  .overlay{position:static;display:block!important;background:#fff;padding:0;overflow:visible}
+  .report{box-shadow:none;max-width:100%}
+  .report-body{padding:0}
+}
+.rep-h{font-family:'DM Serif Display',Georgia,serif;border-bottom:2px solid var(--blue);padding-bottom:5px;margin:20px 0 9px;font-size:1.05rem;color:var(--ink);font-weight:400}
+.rep-meta{display:grid;grid-template-columns:1fr 1fr;gap:5px 18px;font-size:.85rem;margin-bottom:6px}
+.rep-meta span{color:var(--muted)}
+.rep-score{display:flex;align-items:center;gap:14px;background:var(--concrete);border-radius:10px;padding:13px 16px;margin:6px 0}
+.rep-score .big{font-family:'DM Serif Display',Georgia,serif;font-size:2rem;font-weight:400}
+.rep-row{font-size:.86rem;padding:6px 0;border-bottom:1px solid var(--line);display:flex;gap:8px}
+.rep-row .tag{font-size:.64rem;font-weight:700;padding:3px 8px;border-radius:5px;flex:0 0 auto;height:fit-content;text-transform:uppercase;letter-spacing:.03em}
+.tag.pass{background:var(--pass-soft);color:var(--pass)}
+.tag.fail{background:var(--fail-soft);color:var(--fail)}
+.tag.na{background:var(--na-soft);color:var(--na)}
+.rep-row .rn{display:block;color:var(--muted);font-size:.8rem;margin-top:2px}
+.sign{margin-top:26px;display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.sign div{border-top:1px solid var(--ink);padding-top:5px;font-size:.78rem;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<header class="banner">
+  <div class="wrap">
+    <div class="chevrons" aria-hidden="true"></div>
+    <div>
+      <h1>Work Zone Field Audit</h1>
+      <div class="sub">Highway traffic control compliance · WATCM &amp; NB OHS Reg 91-191</div>
+    </div>
+    <div class="org">MRDC<br>SAFETY</div>
+    <a class="home-btn" href="index.html" aria-label="Return to Safety home"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10"/></svg><span>Safety Home</span></a>
+  </div>
+</header>
+
+<div class="statusbar">
+  <div class="wrap">
+    <div class="gauge"><span class="pct" id="pct">—</span><span class="lbl">compliant</span></div>
+    <div class="track"><div class="fill" id="fill"></div></div>
+    <div class="counts" id="counts">0 assessed</div>
+    <div class="verdict" id="verdict">Not started</div>
+  </div>
+</div>
+
+<main class="wrap" id="app"></main>
+
+<div class="actionbar">
+  <div class="wrap">
+    <button class="btn btn-ghost" id="resetBtn">Reset</button>
+    <button class="btn btn-primary" id="reportBtn">Generate report</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="report">
+    <div class="report-bar">
+      <h3>Audit Report</h3>
+      <button class="btn btn-primary" id="submitBtn" style="flex:0 0 auto;padding:8px 16px">Submit</button>
+      <button class="btn btn-ghost" id="printBtn" style="flex:0 0 auto;padding:8px 13px">Print / PDF</button>
+      <button class="btn btn-ghost" id="copyBtn" style="flex:0 0 auto;padding:8px 13px">Copy</button>
+      <button class="x" id="closeBtn" aria-label="Close">×</button>
+    </div>
+    <div id="submitMsg" style="display:none"></div>
+    <div class="report-body" id="reportBody"></div>
+  </div>
+</div>
+
+<script>
+/* ---------------- Audit definition (grounded in WATCM + NB Reg 91-191 Part X + WorkSafeNB) ---------------- */
+const SECTIONS=[
+ {id:'plan',title:'Traffic Control Plan & Setup',intro:'Confirm the layout in use matches the work type, road class and posted speed, and that setup/takedown was done safely.',items:[
+   {id:'p1',t:'A traffic control plan / WATCM layout appropriate to the work and road type is in place',ref:'WATCM'},
+   {id:'p2',t:'Layout matches posted speed and number of lanes present on site',ref:'WATCM'},
+   {id:'p3',t:'Devices were set up (and will be taken down) starting from the approach side, with crews protected',ref:'WATCM'},
+   {id:'p4',t:'Work area does not require crews to intrude on or conflict with each other\u2019s activities',ref:'Reg s.91'},
+ ]},
+ {id:'signs',title:'Advance Warning Signs',intro:'Warning signs must be posted in both directions and at any intersection between the first sign and the work area. Enter the posted speed in the Site Information section to flag the required distance.',items:[
+   {id:'s1',t:'Warning signs posted in both directions of travel',ref:'Reg s.93(2)'},
+   {id:'s2',t:'First warning sign is the correct distance from the work area for the posted speed',ref:'Reg s.93(2)'},
+   {id:'s3',t:'Signs posted at any intersection between the warning sign and the work area',ref:'Reg s.93(2)'},
+   {id:'s4',t:'Signs are clean, retroreflective, upright, unobstructed and legible',ref:'WATCM'},
+   {id:'s5',t:'Correct sign sequence and spacing for the layout',ref:'WATCM'},
+ ],table:true},
+ {id:'devices',title:'Traffic Control Devices',intro:'Cones, barrels, delineators, barriers and lighting channel traffic and protect the work area.',items:[
+   {id:'d1',t:'Cones / barrels / delineators are adequate, correctly spaced and in good condition',ref:'WATCM'},
+   {id:'d2',t:'Tapers are the correct length for the posted speed and lane width',ref:'WATCM'},
+   {id:'d3',t:'A buffer space is provided between the taper and the work area',ref:'WATCM'},
+   {id:'d4',t:'Concrete barriers (or equivalent) at both ends and as a divider between traffic and the work area',ref:'Reg s.92(1)(a)'},
+   {id:'d5',t:'Appropriate lane control devices and flashing lights or flares are in use',ref:'Reg s.92(1)(b)'},
+   {id:'d6',t:'Piled material near traffic is illuminated by warning lights or reflective material',ref:'Reg s.93(1)'},
+ ]},
+ {id:'tcp',title:'Traffic Control Persons (Signallers)',intro:'Signallers must be competent and equipped, and must never be placed in the path of moving equipment.',items:[
+   {id:'t1',t:'Signallers are competent \u2014 qualified by training and experience (e.g. current TCP certification)',ref:'Reg s.91(1)'},
+   {id:'t2',t:'Each signaller uses a reflectorized STOP/SLOW paddle to control traffic',ref:'Reg s.91(3)'},
+   {id:'t3',t:'Signallers are positioned safely with a clear escape route',ref:'WATCM'},
+   {id:'t4',t:'Communication is maintained between multiple signallers / single-lane alternating traffic',ref:'WATCM'},
+   {id:'t5',t:'No worker is assigned to work in the path of moving equipment',ref:'Hazard Alert'},
+ ]},
+ {id:'ppe',title:'Personal Protective Equipment',intro:'Everyone exposed to traffic, mobile equipment or lift trucks must wear high-visibility apparel.',items:[
+   {id:'e1',t:'High-visibility apparel meeting CSA Z96-15 (R2020) worn by all exposed workers',ref:'Reg s.91(2)'},
+   {id:'e2',t:'Head protection worn where required',ref:'PPE'},
+   {id:'e3',t:'Foot protection worn where required',ref:'PPE'},
+   {id:'e4',t:'Apparel is clean, visible and not faded or worn out',ref:'WATCM'},
+ ]},
+ {id:'practice',title:'Worker Safe Work Practices',intro:'Behaviour and positioning of the crew inside the live work zone.',items:[
+   {id:'w1',t:'Workers remain within the protected work area and a safe distance from live traffic',ref:'WATCM'},
+   {id:'w2',t:'Spotters / signals used for backing and equipment movement',ref:'WATCM'},
+   {id:'w3',t:'No workers within the swing radius or blind spots of operating equipment',ref:'WATCM'},
+   {id:'w4',t:'Housekeeping is orderly; materials and tools do not encroach on traffic lanes',ref:'WATCM'},
+ ]},
+ {id:'veh',title:'Vehicles & Equipment',intro:'Vehicles transporting devices and equipment shielding the work area.',items:[
+   {id:'v1',t:'Vehicle transporting traffic control devices has high-visibility flashing lights',ref:'WATCM'},
+   {id:'v2',t:'Equipment positioned to shield workers from traffic where practical',ref:'WATCM'},
+   {id:'v3',t:'Equipment is in safe operating condition (lights, beacons, alarms)',ref:'WATCM'},
+ ]},
+ {id:'public',title:'Speed & Public Protection',intro:'Protection for road users passing through the zone.',items:[
+   {id:'u1',t:'Speed reduction signage in place where required',ref:'WATCM'},
+   {id:'u2',t:'Adequate sight distance; lighting provided for night work',ref:'WATCM'},
+   {id:'u3',t:'Pedestrians / cyclists accommodated where applicable',ref:'WATCM'},
+ ]},
+ {id:'emerg',title:'Emergency Preparedness',intro:'Readiness for an incident on site.',items:[
+   {id:'m1',t:'Emergency contacts and procedures are known to the crew',ref:'OHS'},
+   {id:'m2',t:'First aid supplies / trained first aider available',ref:'OHS'},
+   {id:'m3',t:'Emergency vehicle access to the site is maintained',ref:'OHS'},
+ ]},
+];
+
+const META=[
+ {id:'date',label:'Date',type:'date'},
+ {id:'time',label:'Time',type:'time'},
+ {id:'auditor',label:'Auditor name',type:'text'},
+ {id:'auditorEmail',label:'Auditor email',type:'email'},
+ {id:'contractor',label:'Contractor / company',type:'text'},
+ {id:'project',label:'Project / work order #',type:'text'},
+ {id:'location',label:'Location / route / LKI',type:'text'},
+ {id:'speed',label:'Posted speed (km/h)',type:'number'},
+ {id:'lanes',label:'Lanes / road type',type:'text'},
+ {id:'worktype',label:'Type of work',type:'text'},
+ {id:'weather',label:'Weather / conditions',type:'text'},
+];
+
+const SPEED_BANDS=[
+ {lo:0,hi:25,dist:'25 \u2013 100 m'},
+ {lo:26,hi:50,dist:'101 \u2013 250 m'},
+ {lo:51,hi:80,dist:'251 \u2013 500 m'},
+ {lo:81,hi:999,dist:'501 \u2013 1,000 m'},
+];
+
+const results={};   // id -> {status, note, photoUrls:[]}
+const meta={};
+let rating=null;
+const actions={};   // deficiency item id -> {action, due}
+
+/* ---------------- Render ---------------- */
+const app=document.getElementById('app');
+
+// Site info card
+const infoCard=document.createElement('section');
+infoCard.className='card';
+infoCard.innerHTML=`
+ <div class="card-head" data-toggle>
+   <span class="idx">00</span><h2>Site Information</h2>
+   <span class="chev">\u25BC</span>
+ </div>
+ <div class="card-body">
+   <div class="fields" id="metaFields"></div>
+ </div>`;
+app.appendChild(infoCard);
+const mf=infoCard.querySelector('#metaFields');
+META.forEach(f=>{
+  const wrap=document.createElement('div');
+  wrap.className='field'+(['location','worktype','weather'].includes(f.id)?' full':'');
+  wrap.innerHTML=`<label for="m_${f.id}">${f.label}</label><input id="m_${f.id}" type="${f.type}">`;
+  mf.appendChild(wrap);
+  const inp=wrap.querySelector('input');
+  inp.addEventListener('input',()=>{meta[f.id]=inp.value; if(f.id==='speed') updateSpeedBand();});
+});
+// default date/time
+const now=new Date();
+infoCard.querySelector('#m_date').value=now.toISOString().slice(0,10); meta.date=infoCard.querySelector('#m_date').value;
+infoCard.querySelector('#m_time').value=now.toTimeString().slice(0,5); meta.time=infoCard.querySelector('#m_time').value;
+
+// Section cards
+SECTIONS.forEach((sec,si)=>{
+  const card=document.createElement('section');
+  card.className='card';
+  card.dataset.sec=sec.id;
+  let html=`<div class="card-head" data-toggle>
+     <span class="idx">${String(si+1).padStart(2,'0')}</span>
+     <h2>${sec.title}</h2>
+     <span class="prog" data-prog="${sec.id}">0/${sec.items.length}</span>
+     <span class="chev">\u25BC</span>
+   </div><div class="card-body">`;
+  if(sec.intro) html+=`<p class="intro">${sec.intro}</p>`;
+  if(sec.table){
+    html+=`<div class="req-callout" id="reqCallout" style="display:none"></div>
+    <table class="dist-table"><thead><tr><th>Posted speed (km/h)</th><th>Distance of first warning sign from work area</th></tr></thead><tbody>`;
+    SPEED_BANDS.forEach((b,i)=>{
+      const range=b.hi>=999?'over 80':`${b.lo} \u2013 ${b.hi}`;
+      html+=`<tr data-band="${i}"><td>${range}</td><td>${b.dist}</td></tr>`;
+    });
+    html+=`</tbody></table>`;
+  }
+  sec.items.forEach(it=>{
+    html+=`<div class="item" data-item="${it.id}">
+      <div class="q"><div class="qtext">${it.t}${it.ref?`<br><span class="ref">${it.ref}</span>`:''}</div></div>
+      <div class="seg">
+        <button type="button" data-v="pass">Pass</button>
+        <button type="button" data-v="fail">Fail</button>
+        <button type="button" data-v="na">N/A</button>
+      </div>
+      <div class="followup">
+        <textarea class="note" placeholder="Describe the deficiency and location (required for a Fail)"></textarea>
+        <div class="photo-row">
+          <label class="photo-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Add photo<input type="file" accept="image/*" capture="environment" multiple hidden>
+          </label>
+          <div class="thumbs"></div>
+        </div>
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+  card.innerHTML=html;
+  app.appendChild(card);
+});
+
+// Deficiencies card
+const defCard=document.createElement('section');
+defCard.className='card';
+defCard.innerHTML=`<div class="card-head" data-toggle>
+   <span class="idx">\u26A0</span><h2>Deficiencies &amp; Corrective Actions</h2>
+   <span class="prog" id="defCount">0 open</span><span class="chev">\u25BC</span>
+ </div><div class="card-body"><div id="defList"><div class="def-empty">No deficiencies recorded. Items marked <b>Fail</b> appear here automatically.</div></div></div>`;
+app.appendChild(defCard);
+
+// Rating + sign-off card
+const rateCard=document.createElement('section');
+rateCard.className='card';
+rateCard.innerHTML=`<div class="card-head" data-toggle>
+   <span class="idx">\u2713</span><h2>Overall Assessment &amp; Sign-off</h2><span class="chev">\u25BC</span>
+ </div><div class="card-body">
+   <p class="intro">Record the auditor\u2019s overall determination for this work zone.</p>
+   <div class="rate-grid" id="rateGrid">
+     <button type="button" data-r="full">Compliant</button>
+     <button type="button" data-r="minor">Minor deficiencies</button>
+     <button type="button" data-r="major">Major deficiencies</button>
+     <button type="button" data-r="stop">Stop work \u2014 critical</button>
+   </div>
+   <div class="fields">
+     <div class="field full"><label for="overall">Summary notes / observations</label><textarea id="overall"></textarea></div>
+     <div class="field"><label for="signName">Auditor signature (name)</label><input id="signName" type="text"></div>
+     <div class="field"><label for="reviewedBy">Reviewed with (site supervisor)</label><input id="reviewedBy" type="text"></div>
+   </div>
+ </div>`;
+app.appendChild(rateCard);
+
+/* ---------------- Interactions ---------------- */
+// collapse
+document.addEventListener('click',e=>{
+  const head=e.target.closest('[data-toggle]');
+  if(head){head.closest('.card').classList.toggle('collapsed');}
+});
+
+// segmented controls
+document.querySelectorAll('.item').forEach(item=>{
+  const id=item.dataset.item;
+  results[id]={status:null,note:'',photoUrls:[]};
+  const note=item.querySelector('.note');
+  item.querySelectorAll('.seg button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const v=btn.dataset.v;
+      const same=results[id].status===v;
+      item.querySelectorAll('.seg button').forEach(b=>b.classList.remove('on'));
+      if(same){results[id].status=null;}
+      else{btn.classList.add('on');results[id].status=v;}
+      item.classList.toggle('flag-fail',results[id].status==='fail');
+      item.classList.toggle('show-follow',results[id].status==='fail'||note.value.trim()||results[id].photoUrls.length);
+      recompute();
+    });
+  });
+  note.addEventListener('input',()=>{results[id].note=note.value;note.classList.remove('required-empty');recompute();});
+  const fileInput=item.querySelector('input[type=file]');
+  const thumbs=item.querySelector('.thumbs');
+  fileInput.addEventListener('change',async ()=>{
+    item.classList.add('show-follow');
+    for(const file of [...fileInput.files]){
+      const ph=document.createElement('span');ph.className='thumb-pending';ph.textContent='⋯';thumbs.appendChild(ph);
+      try{
+        const url=await uploadPhoto(file,id);
+        results[id].photoUrls.push(url);
+        const img=document.createElement('img');img.src=url;thumbs.replaceChild(img,ph);
+      }catch(e){
+        ph.textContent='✗';ph.title=e.message;ph.style.color='var(--fail)';
+      }
+    }
+    fileInput.value='';
+  });
+});
+
+// rating
+document.querySelectorAll('#rateGrid button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const r=b.dataset.r;
+    document.querySelectorAll('#rateGrid button').forEach(x=>x.classList.remove('on'));
+    if(rating===r){rating=null;}else{b.classList.add('on');rating=r;}
+  });
+});
+
+// speed band highlight
+function updateSpeedBand(){
+  const sp=parseFloat(meta.speed);
+  const rows=document.querySelectorAll('.dist-table tr[data-band]');
+  const callout=document.getElementById('reqCallout');
+  rows.forEach(r=>r.classList.remove('active'));
+  if(isNaN(sp)){if(callout)callout.style.display='none';return;}
+  const idx=SPEED_BANDS.findIndex(b=>sp<=b.hi);
+  if(idx>=0){
+    rows[idx]&&rows[idx].classList.add('active');
+    if(callout){callout.style.display='block';
+      callout.innerHTML=`At a posted speed of <b>${sp} km/h</b>, the first advance warning sign must be <b>${SPEED_BANDS[idx].dist}</b> from the work area, in both directions.`;}
+  }
+}
+
+/* ---------------- Scoring ---------------- */
+function recompute(){
+  let pass=0,fail=0,na=0,assessed=0;
+  SECTIONS.forEach(sec=>{
+    let done=0;
+    sec.items.forEach(it=>{
+      const s=results[it.id].status;
+      if(s){done++;assessed++;}
+      if(s==='pass')pass++;if(s==='fail')fail++;if(s==='na')na++;
+    });
+    const prog=document.querySelector(`[data-prog="${sec.id}"]`);
+    if(prog){prog.textContent=`${done}/${sec.items.length}`;prog.style.color=done===sec.items.length?'var(--pass)':'var(--muted)';}
+  });
+  const applicable=pass+fail;
+  const pct=applicable?Math.round(pass/applicable*100):0;
+  document.getElementById('pct').textContent=applicable?pct+'%':'—';
+  const fill=document.getElementById('fill');
+  fill.style.width=(applicable?pct:0)+'%';
+  fill.style.background=fail===0?'var(--pass)':(pct>=85?'var(--amber)':'var(--fail)');
+  document.getElementById('counts').textContent=`${pass}\u2713 ${fail}\u2717 ${na} n/a`;
+  const v=document.getElementById('verdict');
+  if(!assessed){v.textContent='Not started';v.style.background='var(--concrete)';v.style.color='var(--muted)';}
+  else if(fail===0){v.textContent='No fails';v.style.background='var(--pass)';v.style.color='#fff';}
+  else if(fail<=2&&pct>=85){v.textContent=fail+' minor';v.style.background='var(--amber)';v.style.color='var(--ink)';}
+  else{v.textContent=fail+' deficiencies';v.style.background='var(--fail)';v.style.color='#fff';}
+  buildDeficiencies();
+}
+
+function buildDeficiencies(){
+  const list=document.getElementById('defList');
+  const fails=[];
+  SECTIONS.forEach(sec=>sec.items.forEach(it=>{
+    if(results[it.id].status==='fail')fails.push({sec:sec.title,it});
+  }));
+  document.getElementById('defCount').textContent=fails.length+' open';
+  if(!fails.length){list.innerHTML='<div class="def-empty">No deficiencies recorded. Items marked <b>Fail</b> appear here automatically.</div>';return;}
+  list.innerHTML='';
+  fails.forEach(({sec,it})=>{
+    if(!actions[it.id])actions[it.id]={action:'',due:''};
+    const note=results[it.id].note||'No note entered \u2014 add a description above.';
+    const el=document.createElement('div');el.className='def';
+    el.innerHTML=`<div class="dsrc">${sec} \u00B7 ${it.ref||''}</div>
+      <div class="dh">${it.t}</div>
+      <div class="dnote">${escapeHtml(note)}</div>
+      <div class="def-action">
+        <input type="text" placeholder="Corrective action" value="${escapeHtml(actions[it.id].action)}">
+        <select><option value="">Priority</option><option>Immediate</option><option>24 hours</option><option>Before next shift</option></select>
+      </div>`;
+    list.appendChild(el);
+    const inp=el.querySelector('input');inp.addEventListener('input',()=>actions[it.id].action=inp.value);
+    const sel=el.querySelector('select');sel.value=actions[it.id].due;sel.addEventListener('change',()=>actions[it.id].due=sel.value);
+  });
+}
+
+function escapeHtml(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ---------------- Report ---------------- */
+const RATING_LABEL={full:'Compliant',minor:'Minor deficiencies',major:'Major deficiencies',stop:'STOP WORK \u2014 critical'};
+function buildReport(){
+  // reset submit state on each open
+  const sb=document.getElementById('submitBtn');sb.textContent='Submit';sb.disabled=false;
+  document.getElementById('submitMsg').style.display='none';
+  // validate fails have notes
+  let missing=false;
+  document.querySelectorAll('.item').forEach(item=>{
+    const id=item.dataset.item;
+    if(results[id].status==='fail'&&!results[id].note.trim()){
+      const note=item.querySelector('.note');note.classList.add('required-empty');missing=true;
+    }
+  });
+  let pass=0,fail=0,na=0;
+  Object.values(results).forEach(r=>{if(r.status==='pass')pass++;if(r.status==='fail')fail++;if(r.status==='na')na++;});
+  const applicable=pass+fail;const pct=applicable?Math.round(pass/applicable*100):0;
+  const verdictColor=fail===0?'var(--pass)':(pct>=85?'var(--amber)':'var(--fail)');
+
+  let html=`<div class="rep-meta">`;
+  META.forEach(f=>{html+=`<div><span>${f.label}:</span> ${escapeHtml(meta[f.id]||'—')}</div>`;});
+  html+=`</div>
+   <div class="rep-score">
+     <div class="big" style="color:${verdictColor}">${applicable?pct+'%':'—'}</div>
+     <div><div style="font-weight:600">${rating?RATING_LABEL[rating]:'Overall rating not set'}</div>
+     <div style="font-size:.82rem;color:var(--muted)">${pass} pass · ${fail} fail · ${na} n/a · of ${pass+fail+na} assessed</div></div>
+   </div>`;
+  if(missing) html+=`<div class="req-callout" style="display:block;border-color:var(--fail);background:var(--fail-soft)">Some failed items are missing a description \u2014 highlighted in the form below.</div>`;
+
+  SECTIONS.forEach(sec=>{
+    const assessed=sec.items.filter(it=>results[it.id].status);
+    if(!assessed.length)return;
+    html+=`<div class="rep-h">${sec.title}</div>`;
+    sec.items.forEach(it=>{
+      const r=results[it.id];if(!r.status)return;
+      html+=`<div class="rep-row"><span class="tag ${r.status}">${r.status.toUpperCase()}</span><div>${it.t}
+        ${r.note?`<span class="rn">${escapeHtml(r.note)}</span>`:''}
+        ${actions[it.id]&&actions[it.id].action?`<span class="rn">↳ Action: ${escapeHtml(actions[it.id].action)}${actions[it.id].due?' ('+escapeHtml(actions[it.id].due)+')':''}</span>`:''}
+        ${r.photoUrls.length?`<span class="rn">📷 ${r.photoUrls.length} photo(s) attached</span>`:''}</div></div>`;
+    });
+  });
+
+  const overall=document.getElementById('overall').value;
+  if(overall) html+=`<div class="rep-h">Summary Notes</div><div style="font-size:.88rem">${escapeHtml(overall)}</div>`;
+  html+=`<div class="sign">
+     <div>${escapeHtml(document.getElementById('signName').value||'')}<br>Auditor signature &amp; date</div>
+     <div>${escapeHtml(document.getElementById('reviewedBy').value||'')}<br>Reviewed with (supervisor)</div>
+   </div>`;
+  document.getElementById('reportBody').innerHTML=html;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function plainTextReport(){
+  let lines=['WORK ZONE FIELD AUDIT — MRDC SAFETY',''];
+  META.forEach(f=>lines.push(`${f.label}: ${meta[f.id]||'—'}`));
+  let pass=0,fail=0,na=0;Object.values(results).forEach(r=>{if(r.status==='pass')pass++;if(r.status==='fail')fail++;if(r.status==='na')na++;});
+  const applicable=pass+fail;const pct=applicable?Math.round(pass/applicable*100):0;
+  lines.push('',`COMPLIANCE: ${applicable?pct+'%':'n/a'}  (${pass} pass / ${fail} fail / ${na} n/a)`);
+  lines.push(`OVERALL RATING: ${rating?RATING_LABEL[rating]:'not set'}`,'');
+  SECTIONS.forEach(sec=>{
+    const any=sec.items.some(it=>results[it.id].status);if(!any)return;
+    lines.push('— '+sec.title.toUpperCase()+' —');
+    sec.items.forEach(it=>{const r=results[it.id];if(!r.status)return;
+      lines.push(`  [${r.status.toUpperCase()}] ${it.t}`);
+      if(r.note)lines.push(`        note: ${r.note}`);
+      if(actions[it.id]&&actions[it.id].action)lines.push(`        action: ${actions[it.id].action}${actions[it.id].due?' ('+actions[it.id].due+')':''}`);
+    });lines.push('');
+  });
+  const overall=document.getElementById('overall').value;if(overall)lines.push('SUMMARY: '+overall,'');
+  lines.push('Auditor: '+(document.getElementById('signName').value||'__________'));
+  lines.push('Reviewed with: '+(document.getElementById('reviewedBy').value||'__________'));
+  return lines.join('\n');
+}
+
+/* ---------------- Submit to backend ---------------- */
+// Change this if facility-safety-api uses a custom production domain.
+const SUBMIT_URL='https://facility-safety-api.vercel.app/api/submit-audit';
+
+// ---- Photo upload → Cloudinary (unsigned, direct from the browser) ----
+const CLOUDINARY_CLOUD_NAME='djrqifos6';
+const CLOUDINARY_UPLOAD_PRESET='uzh72cqd';
+
+async function uploadPhoto(file,slot){
+  const fd=new FormData();
+  fd.append('file',file);
+  fd.append('upload_preset',CLOUDINARY_UPLOAD_PRESET);
+  fd.append('folder','audits');
+  const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`,{method:'POST',body:fd});
+  const j=await res.json().catch(()=>({}));
+  if(!res.ok||!j.secure_url)throw new Error((j.error&&j.error.message)||('Cloudinary upload failed ('+res.status+')'));
+  return j.secure_url;
+}
+
+function getScores(){
+  let pass=0,fail=0,na=0;
+  Object.values(results).forEach(r=>{if(r.status==='pass')pass++;if(r.status==='fail')fail++;if(r.status==='na')na++;});
+  const applicable=pass+fail;
+  return {pass,fail,na,assessed:pass+fail+na,pct:applicable?Math.round(pass/applicable*100):0};
+}
+
+function buildPayload(){
+  const checklist=[];
+  SECTIONS.forEach(sec=>sec.items.forEach(it=>{
+    const r=results[it.id];
+    if(!r.status)return;
+    checklist.push({
+      section:sec.title,id:it.id,text:it.t,ref:it.ref||'',
+      status:r.status,note:r.note||'',
+      action:(actions[it.id]&&actions[it.id].action)||'',
+      priority:(actions[it.id]&&actions[it.id].due)||'',
+      photoUrls:r.photoUrls||[],
+    });
+  }));
+  return {
+    meta:{...meta},
+    scores:getScores(),
+    rating:rating,
+    summaryNotes:document.getElementById('overall').value,
+    signName:document.getElementById('signName').value,
+    reviewedBy:document.getElementById('reviewedBy').value,
+    checklist,
+  };
+}
+
+function showSubmitResult(ok,msg){
+  const el=document.getElementById('submitMsg');
+  el.style.cssText='display:block;margin:0;padding:12px 18px;font-size:.9rem;font-weight:600;'+
+    (ok?'background:var(--pass-soft);color:var(--pass);':'background:var(--fail-soft);color:var(--fail);');
+  el.textContent=msg;
+}
+
+// Build a text-based PDF of the completed audit, return base64 (or null on failure).
+function generateAuditPdfBase64(p){
+  try{
+    const J=window.jspdf&&window.jspdf.jsPDF;
+    if(!J)return null;
+    const doc=new J({unit:'pt',format:'letter'});
+    const M=50,W=doc.internal.pageSize.getWidth()-M*2;let y=56;
+    const line=(t,o={})=>{
+      const{size=10,bold=false,color=[0,0,0],gap=4,indent=0}=o;
+      doc.setFont('helvetica',bold?'bold':'normal');doc.setFontSize(size);doc.setTextColor(color[0],color[1],color[2]);
+      doc.splitTextToSize(String(t),W-indent).forEach(ln=>{if(y>740){doc.addPage();y=56;}doc.text(ln,M+indent,y);y+=size+gap;});
+    };
+    const RATING={full:'Compliant',minor:'Minor deficiencies',major:'Major deficiencies',stop:'Stop work - critical'};
+    const COL={pass:[15,110,86],fail:[163,45,45],na:[107,118,134]};
+    const m=p.meta;
+    line('Work Zone Field Audit',{size:18,bold:true,color:[27,79,138],gap:2});
+    line('Highway traffic control compliance — WATCM / NB OHS Reg 91-191',{size:9,color:[120,120,120],gap:8});
+    const kv=(k,v)=>line(`${k}: ${v||'—'}`,{size:9,gap:3});
+    kv('Contractor',m.contractor);kv('Location',m.location);
+    kv('Auditor',`${m.auditor||'—'}${m.auditorEmail?` <${m.auditorEmail}>`:''}`);
+    kv('Date / time',`${m.date||'—'} ${m.time||''}`);kv('Work order',m.project);
+    kv('Posted speed',m.speed?`${m.speed} km/h`:'—');kv('Lanes / road type',m.lanes);
+    kv('Type of work',m.worktype);kv('Weather',m.weather);
+    y+=4;
+    line(`Compliance: ${p.scores.pct!=null?p.scores.pct+'%':'—'}    ${p.scores.pass} pass / ${p.scores.fail} fail / ${p.scores.na} n/a    Rating: ${p.rating?RATING[p.rating]:'not set'}`,{size:10,bold:true,gap:8});
+    let last='';
+    p.checklist.forEach(c=>{
+      if(c.section!==last){y+=4;line(c.section,{size:10,bold:true,color:[22,24,29],gap:3});last=c.section;}
+      line(`${c.status.toUpperCase()}  ${c.text}`,{size:9,bold:true,color:COL[c.status]||[0,0,0],gap:2});
+      if(c.note)line(c.note,{size:8,color:[90,90,90],indent:14,gap:3});
+    });
+    const fails=p.checklist.filter(c=>c.status==='fail');
+    if(fails.length){
+      y+=6;line('Deficiencies & corrective actions',{size:11,bold:true,color:[163,45,45],gap:4});
+      fails.forEach(c=>{
+        line('• '+c.text,{size:9,bold:true,gap:2});
+        if(c.action)line('Action: '+c.action+(c.priority?` (${c.priority})`:''),{size:9,color:[90,90,90],indent:14,gap:3});
+      });
+    }
+    if(p.summaryNotes){y+=4;line('Summary',{size:10,bold:true,gap:3});line(p.summaryNotes,{size:9,gap:3});}
+    y+=10;
+    line('Auditor: '+(p.signName||'__________________'),{size:9,gap:3});
+    line('Reviewed with: '+(p.reviewedBy||'__________________'),{size:9,gap:3});
+    const uri=doc.output('datauristring');
+    return uri.substring(uri.indexOf(',')+1);
+  }catch(e){return null;}
+}
+
+async function submitAudit(){
+  if(!meta.auditor||!meta.contractor){showSubmitResult(false,'Enter the auditor name and contractor before submitting.');return;}
+  if(!getScores().assessed){showSubmitResult(false,'Assess at least one item before submitting.');return;}
+  let missing=false;
+  document.querySelectorAll('.item').forEach(item=>{
+    const id=item.dataset.item;
+    if(results[id].status==='fail'&&!results[id].note.trim()){item.querySelector('.note').classList.add('required-empty');missing=true;}
+  });
+  if(missing){showSubmitResult(false,'Each failed item needs a description before you can submit.');return;}
+  const btn=document.getElementById('submitBtn');
+  btn.textContent='Submitting…';btn.disabled=true;
+  try{
+    const payload=buildPayload();
+    payload.pdf=generateAuditPdfBase64(payload);
+    const res=await fetch(SUBMIT_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok||!data.ok)throw new Error(data.detail||data.error||('HTTP '+res.status));
+    btn.textContent='Submitted ✓';
+    showSubmitResult(true,`Audit ${data.auditId} saved${data.deficiencies?` with ${data.deficiencies} deficiency(ies) logged`:''}.${data.emailed?' A PDF copy was emailed to you.':' It\u2019s on the audit log and the auditor\u2019s file.'}`);
+  }catch(err){
+    btn.textContent='Submit';btn.disabled=false;
+    showSubmitResult(false,'Could not submit \u2014 '+err.message+'. Your entries are still here; try again or use Copy as a backup.');
+  }
+}
+
+document.getElementById('submitBtn').addEventListener('click',submitAudit);
+
+document.getElementById('reportBtn').addEventListener('click',buildReport);
+document.getElementById('closeBtn').addEventListener('click',()=>document.getElementById('overlay').classList.remove('open'));
+document.getElementById('overlay').addEventListener('click',e=>{if(e.target.id==='overlay')document.getElementById('overlay').classList.remove('open');});
+document.getElementById('printBtn').addEventListener('click',()=>window.print());
+document.getElementById('copyBtn').addEventListener('click',()=>{
+  navigator.clipboard.writeText(plainTextReport()).then(()=>{
+    const b=document.getElementById('copyBtn');const o=b.textContent;b.textContent='Copied ✓';setTimeout(()=>b.textContent=o,1500);
+  });
+});
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  if(!confirm('Clear all entries and start a new audit?'))return;
+  location.reload();
+});
+
+recompute();
+</script>
+</body>
+</html>
