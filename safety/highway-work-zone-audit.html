@@ -348,9 +348,7 @@ const mf=infoCard.querySelector('#metaFields');
 META.forEach(f=>{
   const wrap=document.createElement('div');
   wrap.className='field'+(['location','worktype','weather'].includes(f.id)?' full':'');
-  const listAttr=f.id==='location'?' list="locationOptions"':'';
-  const dataList=f.id==='location'?'<datalist id="locationOptions"></datalist>':'';
-  wrap.innerHTML=`<label for="m_${f.id}">${f.label}</label><input id="m_${f.id}" type="${f.type}"${listAttr}>${dataList}`;
+  wrap.innerHTML=`<label for="m_${f.id}">${f.label}</label><input id="m_${f.id}" type="${f.type}">`;
   mf.appendChild(wrap);
   const inp=wrap.querySelector('input');
   inp.addEventListener('input',()=>{meta[f.id]=inp.value; if(f.id==='speed') updateSpeedBand();});
@@ -359,27 +357,6 @@ META.forEach(f=>{
 const now=new Date();
 infoCard.querySelector('#m_date').value=now.toISOString().slice(0,10); meta.date=infoCard.querySelector('#m_date').value;
 infoCard.querySelector('#m_time').value=now.toTimeString().slice(0,5); meta.time=infoCard.querySelector('#m_time').value;
-
-// Prefill auditor from the signed-in safety-app user (handed over via storage on login).
-// Fields stay fully editable — we only fill them when blank, and respect the session expiry.
-(function prefillAuditorFromSession(){
-  function read(){
-    for(const store of [localStorage, sessionStorage]){
-      try{
-        const raw=store.getItem('mrdc_safety_auditor');
-        if(raw){ const o=JSON.parse(raw); if(!o.exp||Date.now()<o.exp) return o; }
-      }catch(_){}
-    }
-    return null;
-  }
-  const u=read();
-  if(!u){ console.warn('[audit] No signed-in auditor in storage. Sign into the safety app (which writes mrdc_safety_auditor on login) on the SAME origin as this form, then reopen.'); return; }
-  const nameEl=document.getElementById('m_auditor');
-  const emailEl=document.getElementById('m_auditorEmail');
-  if(u.name&&nameEl&&!nameEl.value){ nameEl.value=u.name; meta.auditor=u.name; }
-  if(u.email&&emailEl&&!emailEl.value){ emailEl.value=u.email; meta.auditorEmail=u.email; }
-  console.log('[audit] Auditor prefilled:', u.name||'(no name)', u.email||'(no email)');
-})();
 
 // Section cards
 SECTIONS.forEach((sec,si)=>{
@@ -657,22 +634,6 @@ function plainTextReport(){
 /* ---------------- Submit to backend ---------------- */
 // Change this if facility-safety-api uses a custom production domain.
 const SUBMIT_URL='https://facility-safety-api.vercel.app/api/submit-audit';
-
-// Populate the Location dropdown from the same zones used in Contractor Hours (/api/boundaries).
-// The field stays a free-text input — these are just suggestions, so route/LKI detail can still be typed.
-(async function loadLocationOptions(){
-  const dl=document.getElementById('locationOptions');
-  if(!dl) return;
-  try{
-    const res=await fetch(SUBMIT_URL.replace('/submit-audit','/boundaries'));
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    const data=await res.json();
-    const boundaries=(data&&data.boundaries)||[];
-    dl.innerHTML=boundaries
-      .map(b=>(b&&b.name?`<option value="${String(b.name).replace(/"/g,'&quot;')}"></option>`:''))
-      .join('');
-  }catch(_){ /* on failure the field is still a normal text box */ }
-})();
 
 // ---- Photo upload → Cloudinary (unsigned, direct from the browser) ----
 const CLOUDINARY_CLOUD_NAME='djrqifos6';

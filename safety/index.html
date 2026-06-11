@@ -264,8 +264,37 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
   <div class="expire-banner" id="adm-expire"><i class="ti ti-alert-triangle" style="font-size:15px;flex-shrink:0" aria-hidden="true"></i><span>Session expiring soon.</span><button class="btn-sm" style="margin-left:auto" onclick="resetTimer('adm')">Stay signed in</button></div>
   <div class="card" id="online-forms-section" style="padding:1rem 1.25rem;display:none">
     <div class="section-label"><i class="ti ti-forms" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>Online Forms</div>
-    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:0.75rem">
-      <a id="audit-launch" href="highway-work-zone-audit.html" style="display:none;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;background:#E8772E;color:#fff;border:0.5px solid #E8772E;transition:background 0.15s" onmouseover="this.style.background='#C2611F'" onmouseout="this.style.background='#E8772E'"><i class="ti ti-clipboard-check" style="font-size:15px" aria-hidden="true"></i> Work Zone Audit</a>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:0.75rem">
+
+      <!-- Work Zone Audit -->
+      <div style="border:0.5px solid #D6DFEA;border-radius:12px;padding:14px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <div style="width:30px;height:30px;border-radius:8px;background:#E8772E;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-clipboard-check" aria-hidden="true"></i></div>
+          <div style="font-size:14px;font-weight:600">Work Zone Audit</div>
+        </div>
+        <div style="font-size:12px;color:#666;margin-bottom:10px">Highway traffic-control compliance audits.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a id="audit-launch" href="highway-work-zone-audit.html" style="display:none;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;background:#E8772E;color:#fff;border:0.5px solid #E8772E" onmouseover="this.style.background='#C2611F'" onmouseout="this.style.background='#E8772E'"><i class="ti ti-plus" style="font-size:14px" aria-hidden="true"></i> Open form</a>
+          <a href="review-work-zone-audits.html" style="display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;background:transparent;color:#1B4F8A;border:0.5px solid #1B4F8A" onmouseover="this.style.background='#EAF1F9'" onmouseout="this.style.background='transparent'"><i class="ti ti-eye" style="font-size:14px" aria-hidden="true"></i> Review submissions</a>
+        </div>
+      </div>
+
+      <!-- TEMPLATE FOR YOUR NEXT FORM — copy this tile, rename it, point the
+           "Open form" link at your form page and the "Review submissions"
+           link at review-<your-form>.html
+      <div style="border:0.5px solid #D6DFEA;border-radius:12px;padding:14px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <div style="width:30px;height:30px;border-radius:8px;background:#1B4F8A;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-file" aria-hidden="true"></i></div>
+          <div style="font-size:14px;font-weight:600">New Form</div>
+        </div>
+        <div style="font-size:12px;color:#666;margin-bottom:10px">Short description.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a href="new-form.html" style="display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;background:#E8772E;color:#fff;border:0.5px solid #E8772E"><i class="ti ti-plus" style="font-size:14px"></i> Open form</a>
+          <a href="review-new-form.html" style="display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;background:transparent;color:#1B4F8A;border:0.5px solid #1B4F8A"><i class="ti ti-eye" style="font-size:14px"></i> Review submissions</a>
+        </div>
+      </div>
+      -->
+
     </div>
   </div>
   <div class="card" style="padding:1rem 1.25rem">
@@ -292,7 +321,6 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
     <button class="tab active" onclick="switchTab('adm','contractors')"><i class="ti ti-users" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>By contractor</button>
     <button class="tab" onclick="switchTab('adm','entries')"><i class="ti ti-list" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>All entries</button>
     <button class="tab" onclick="switchTab('adm','documents')"><i class="ti ti-files" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>Documents</button>
-    <button class="tab" onclick="switchTab('adm','audits')" id="audits-tab" style="display:none"><i class="ti ti-clipboard-check" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>Work Zone Audits</button>
     <button class="tab" onclick="switchTab('adm','manage-contractors')" id="manage-contractors-tab" style="display:none"><i class="ti ti-hard-hat" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>Contractors</button>
     <button class="tab" onclick="switchTab('adm','users')" id="users-tab" style="display:none"><i class="ti ti-key" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>Manage users</button>
   </div>
@@ -338,39 +366,6 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
     </div>
   </div>
 
-  <div id="adm-view-audits" class="view">
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
-        <div class="section-label" style="margin-bottom:0">Submitted work zone audits</div>
-        <button class="btn-sm" onclick="loadAudits()"><i class="ti ti-refresh" style="font-size:13px" aria-hidden="true"></i> Refresh</button>
-      </div>
-      <div id="audit-list"><div class="empty"><i class="ti ti-loader" aria-hidden="true"></i>Loading...</div></div>
-    </div>
-    <!-- Review panel (inline, hidden) -->
-    <div id="audit-review-modal" style="display:none">
-      <div class="card" style="border:2px solid #1B4F8A">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem">
-          <div class="section-label" style="margin-bottom:0" id="ar-title">Review audit</div>
-          <button class="btn-sm" onclick="closeAuditReview()"><i class="ti ti-x" style="font-size:13px" aria-hidden="true"></i> Close</button>
-        </div>
-        <input type="hidden" id="ar-id"/>
-        <div id="ar-details" style="font-size:13px;color:#333;background:#F4F7FB;border-radius:8px;padding:12px;margin-bottom:12px"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="field" style="margin-bottom:0"><label>Review status</label>
-            <select id="ar-status"><option>Open</option><option>Reviewed</option><option>Closed</option></select>
-          </div>
-        </div>
-        <div class="field" style="margin-bottom:0.5rem;margin-top:0.75rem"><label>Safety review comment</label>
-          <textarea id="ar-comment" rows="4" placeholder="Add a note for the auditor..."></textarea>
-        </div>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#333;margin-bottom:0.75rem"><input type="checkbox" id="ar-email" style="width:auto"/> Email this note to the auditor</label>
-        <div class="btn-row">
-          <button class="btn" onclick="closeAuditReview()"><i class="ti ti-x" aria-hidden="true"></i> Cancel</button>
-          <button class="btn btn-blue" id="ar-save" onclick="saveAuditReview()"><i class="ti ti-device-floppy" aria-hidden="true"></i> Save review</button>
-        </div>
-      </div>
-    </div>
-  </div>
   <div id="adm-view-manage-contractors" class="view">
     <div class="card">
       <div class="section-label">Add new contractor</div>
@@ -520,7 +515,7 @@ async function doLogin() {
   }
 }
 
-function startSession(restored) {
+function startSession() {
   el('login-shell').classList.add('hidden');
   const initials = session.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
   if (session.role === 'Contractor') {
@@ -547,7 +542,6 @@ function startSession(restored) {
     if ((session.appAccess || []).includes('Audits') || session.role === 'Admin') {
       const auditLaunch = el('audit-launch'); if (auditLaunch) auditLaunch.style.display = 'inline-flex';
       const onlineForms = el('online-forms-section'); if (onlineForms) onlineForms.style.display = '';
-      const auditsTab = el('audits-tab'); if (auditsTab) auditsTab.style.display = '';
     }
     const rb = el('adm-role-badge'); rb.textContent = session.role;
     rb.className = 'role-badge ' + (session.role === 'Admin' ? 'rb-admin' : 'rb-viewer');
@@ -561,8 +555,7 @@ function startSession(restored) {
   }
   resetTimer(session.role === 'Contractor' ? 'ct' : 'adm');
   ACTIVITY.forEach(e => document.addEventListener(e, activityHandler, { passive: true }));
-  if (!restored) showToast('Welcome, ' + session.name);
-  persistSession();
+  showToast('Welcome, ' + session.name);
 }
 
 function activityHandler() { if (session) resetTimer(session.role === 'Contractor' ? 'ct' : 'adm'); }
@@ -577,7 +570,6 @@ function resetTimer(prefix) {
 function tickTimer(prefix) {
   const rem = sessionExpiry - Date.now();
   if (rem <= 0) { expireSession(); return; }
-  persistSession();
   const m = Math.floor(rem / 60000), s = Math.floor((rem % 60000) / 1000);
   el(prefix + '-timer-txt').textContent = m + ':' + (s < 10 ? '0' : '') + s;
   if (rem <= WARN_MS) { el(prefix + '-timer-pill').className = 'timer-pill warn'; el(prefix + '-expire').classList.add('show'); }
@@ -587,7 +579,6 @@ function tickTimer(prefix) {
 function expireSession() {
   clearInterval(timerInterval); ACTIVITY.forEach(e => document.removeEventListener(e, activityHandler)); session = null;
   try { localStorage.removeItem('mrdc_safety_auditor'); } catch (_) {}
-  clearPersistedSession();
   el('contractor-shell').classList.add('hidden'); el('admin-shell').classList.add('hidden');
   el('login-shell').classList.remove('hidden'); el('inp-pw').value = '';
   el('login-btn').disabled = false; el('login-btn').innerHTML = '<i class="ti ti-login"></i> Sign in';
@@ -597,7 +588,6 @@ function expireSession() {
 function doLogout() {
   clearInterval(timerInterval); ACTIVITY.forEach(e => document.removeEventListener(e, activityHandler)); session = null;
   try { localStorage.removeItem('mrdc_safety_auditor'); } catch (_) {}
-  clearPersistedSession();
   el('contractor-shell').classList.add('hidden'); el('admin-shell').classList.add('hidden');
   el('login-shell').classList.remove('hidden'); el('inp-user').value = ''; el('inp-pw').value = '';
   hideErr(); showToast('Signed out successfully');
@@ -609,7 +599,6 @@ function switchTab(prefix, tab) {
   document.querySelectorAll(`#${shell}-shell .view`).forEach(v => v.classList.remove('active'));
   document.querySelector(`#${shell}-shell .tab[onclick="switchTab('${prefix}','${tab}')"]`).classList.add('active');
   el(`${prefix === 'ct' ? 'ct' : 'adm'}-view-${tab}`).classList.add('active');
-  if (prefix === 'adm' && tab === 'audits') loadAudits();
 }
 
 // ── CONTRACTOR FORM ──
@@ -978,8 +967,7 @@ function renderContractorList() {
         <div style="font-size:12px;color:#666">${c.company}${c.email?' · '+c.email:''}${c.phone?' · '+c.phone:''}</div>
       </div>
       ${c.active===false?'<span style="font-size:11px;background:#EDF1F6;color:#999;padding:2px 8px;border-radius:99px;font-weight:500">Inactive</span>':''}
-      <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end">
-        ${c.email ? `<a class="btn-sm" href="mailto:${c.email}" style="text-decoration:none;border-color:#1B4F8A;color:#1B4F8A" title="Send email"><i class="ti ti-mail" style="font-size:13px"></i> Email</a>` : ''}
+      <div style="display:flex;gap:6px;flex-shrink:0">
         <button class="btn-sm" onclick="openEditModal('${c.id}')"><i class="ti ti-edit" style="font-size:13px"></i> Edit</button>
         ${c.active!==false
           ? `<button class="btn-sm danger" onclick="toggleActive('${c.id}',false)"><i class="ti ti-user-off" style="font-size:13px"></i> Deactivate</button>`
@@ -1397,118 +1385,6 @@ async function removeUser(id, name) {
     showToast(name + ' removed');
   } catch (e) { showToast(e.message || 'Failed to remove user', true); }
 }
-// ── Work Zone Audits review ──────────────────────────────────────────
-let auditList = [];
-function escAudit(s){return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
-function auditStatusBadge(s){
-  const m={'Open':'background:#FAF0DA;color:#8A5A00','Reviewed':'background:#EAF1F9;color:#143C6B','Closed':'background:#E3F3EC;color:#0F6E56'};
-  return m[s]||m['Open'];
-}
-function auditRatingBadge(r){
-  const m={'Compliant':'background:#E3F3EC;color:#0F6E56','Minor deficiencies':'background:#FAF0DA;color:#8A5A00','Major deficiencies':'background:#FCEEE1;color:#8A4A12','Stop work - critical':'background:#FBEBEB;color:#A32D2D'};
-  return m[r]||'background:#EDF1F6;color:#5E6B80';
-}
-async function loadAudits(){
-  const listEl=el('audit-list');
-  listEl.innerHTML='<div class="empty"><i class="ti ti-loader" aria-hidden="true"></i>Loading...</div>';
-  try{
-    const data=await api('/api/audits');
-    auditList=data.audits||[];
-    renderAuditList();
-  }catch(e){
-    listEl.innerHTML=`<div class="empty"><i class="ti ti-alert-circle" aria-hidden="true"></i>${escAudit(e.message||'Could not load audits')}</div>`;
-  }
-}
-function renderAuditList(){
-  const listEl=el('audit-list');
-  if(!auditList.length){ listEl.innerHTML='<div class="empty"><i class="ti ti-clipboard-off" aria-hidden="true"></i>No submitted audits yet</div>'; return; }
-  listEl.innerHTML=auditList.map(a=>`
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid #D6DFEA">
-      <div style="flex:1;min-width:0">
-        <div style="font-size:14px;font-weight:500">${escAudit(a.auditId)||'(no id)'} ${a.rating?`<span class="badge" style="${auditRatingBadge(a.rating)}">${escAudit(a.rating)}</span>`:''}</div>
-        <div style="font-size:12px;color:#666">${escAudit(a.date)||'—'} &middot; ${escAudit(a.contractor)||'—'} &middot; ${escAudit(a.location)||'—'} &middot; ${a.compliancePct!=null?a.compliancePct+'%':'—'}</div>
-      </div>
-      <span class="badge" style="${auditStatusBadge(a.status)}">${escAudit(a.status||'Open')}</span>
-      <button class="btn-sm" onclick="openAuditReview('${a.id}')"><i class="ti ti-eye" style="font-size:13px"></i> Review</button>
-    </div>
-  `).join('')+'<style>#audit-list > div:last-child{border-bottom:none}</style>';
-}
-function auditDetailsHtml(a){
-  const kv=(k,v)=>`<div><span style="color:#888">${k}:</span> ${escAudit(v)||'—'}</div>`;
-  let h='<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px">';
-  h+=kv('Auditor',a.auditor)+kv('Date',(a.date||'')+(a.time?' '+a.time:''));
-  h+=kv('Contractor',a.contractor)+kv('Work order',a.workOrder);
-  h+=kv('Location',a.location)+kv('Posted speed',a.speed!==''?a.speed+' km/h':'');
-  h+=kv('Compliance',a.compliancePct!=null?a.compliancePct+'%':'')+kv('Pass / Fail / N/A',`${a.pass} / ${a.fail} / ${a.na}`);
-  h+='</div>';
-  if(a.summaryNotes) h+=`<div style="margin-top:8px"><span style="color:#888">Summary:</span> ${escAudit(a.summaryNotes)}</div>`;
-  const fails=(a.checklist||[]).filter(c=>c.status==='fail');
-  if(fails.length){
-    h+=`<div style="margin-top:8px;color:#A32D2D;font-weight:500">Deficiencies (${fails.length})</div><ul style="margin:4px 0 0;padding-left:18px">`;
-    fails.forEach(c=>{ h+=`<li>${escAudit(c.text)}${c.note?` &mdash; <span style="color:#666">${escAudit(c.note)}</span>`:''}</li>`; });
-    h+='</ul>';
-  }
-  if(a.photoUrls&&a.photoUrls.length){
-    h+='<div style="margin-top:8px"><span style="color:#888">Photos:</span> '+a.photoUrls.map((u,i)=>`<a href="${encodeURI(u)}" target="_blank" rel="noopener" style="color:#1B4F8A">#${i+1}</a>`).join(' ')+'</div>';
-  }
-  if(a.reviewedBy||a.reviewedAt){
-    h+=`<div style="margin-top:8px;color:#888;font-size:12px">Last reviewed by ${escAudit(a.reviewedBy)||'—'}${a.reviewedAt?' &middot; '+new Date(a.reviewedAt).toLocaleString():''}</div>`;
-  }
-  return h;
-}
-function openAuditReview(id){
-  const a=auditList.find(x=>x.id===id); if(!a) return;
-  el('ar-id').value=a.id;
-  el('ar-title').textContent='Review — '+(a.auditId||'audit');
-  el('ar-details').innerHTML=auditDetailsHtml(a);
-  el('ar-status').value=(['Open','Reviewed','Closed'].includes(a.status)?a.status:'Open');
-  el('ar-comment').value=a.safetyComments||'';
-  const emailBox=el('ar-email'); emailBox.checked=!!a.auditorEmail; emailBox.disabled=!a.auditorEmail;
-  el('audit-review-modal').style.display='';
-  el('audit-review-modal').scrollIntoView({behavior:'smooth',block:'center'});
-}
-function closeAuditReview(){ el('audit-review-modal').style.display='none'; }
-async function saveAuditReview(){
-  const id=el('ar-id').value;
-  const safetyComments=el('ar-comment').value.trim();
-  const status=el('ar-status').value;
-  const doEmail=el('ar-email').checked;
-  const btn=el('ar-save'); const orig=btn.innerHTML; btn.disabled=true; btn.innerHTML='<i class="ti ti-loader"></i> Saving...';
-  try{
-    const data=await api('/api/audits',{method:'PATCH',body:JSON.stringify({ id, safetyComments, status, reviewedBy: session.name, emailAuditor: doEmail })});
-    const idx=auditList.findIndex(x=>x.id===id);
-    if(idx>-1 && data.audit) auditList[idx]=data.audit;
-    renderAuditList();
-    closeAuditReview();
-    showToast(`Review saved${data.emailed?' · auditor emailed':''} ✓`);
-  }catch(e){
-    showToast(e.message||'Could not save review', true);
-  }finally{
-    btn.disabled=false; btn.innerHTML=orig;
-  }
-}
-
-// ── Session persistence ──────────────────────────────────────────────
-// Keeps the login across in-app navigation (e.g. the Work Zone form's
-// "Safety Home" button) without forcing a re-login. Stored in sessionStorage,
-// so it clears when the tab closes; the 30-min inactivity timeout still applies
-// via the saved expiry.
-function persistSession() {
-  try { if (session) sessionStorage.setItem('mrdc_safety_session', JSON.stringify({ s: session, exp: sessionExpiry })); } catch (_) {}
-}
-function clearPersistedSession() {
-  try { sessionStorage.removeItem('mrdc_safety_session'); } catch (_) {}
-}
-(function tryRestoreSession() {
-  try {
-    const raw = sessionStorage.getItem('mrdc_safety_session');
-    if (!raw) return;
-    const o = JSON.parse(raw);
-    if (!o || !o.s || !o.exp || Date.now() >= o.exp) { clearPersistedSession(); return; }
-    session = o.s;
-    startSession(true);   // restored — skip the welcome toast, refresh the timer
-  } catch (_) { clearPersistedSession(); }
-})();
 </script>
 </body>
 </html>
