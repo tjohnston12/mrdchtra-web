@@ -312,12 +312,10 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
 
     </div>
   </div>
-  <div class="tabs" id="adm-mgmt-tabs" style="display:none">
-    <button class="tab" onclick="switchTab('adm','manage-contractors')" id="manage-contractors-tab"><i class="ti ti-hard-hat" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>Contractors</button>
-    <button class="tab" onclick="switchTab('adm','users')" id="users-tab"><i class="ti ti-key" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>Manage users</button>
-  </div>
 
-  <div id="adm-view-manage-contractors" class="view">
+  <!-- Contractors — Admin-only management section (moved out of the tab system) -->
+  <div id="adm-contractors-section" style="display:none">
+    <div class="section-label" style="font-size:14px;margin:0.25rem 0 0.75rem"><i class="ti ti-hard-hat" style="font-size:14px;vertical-align:-2px;margin-right:5px" aria-hidden="true"></i>Contractors</div>
     <div class="card">
       <div class="section-label">Add new contractor</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -368,6 +366,10 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
       </div>
     </div>
   </div>
+  <div class="tabs" id="adm-mgmt-tabs" style="display:none">
+    <button class="tab" onclick="switchTab('adm','users')" id="users-tab"><i class="ti ti-key" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>Manage users</button>
+  </div>
+
   <div id="adm-view-users" class="view">
     <div class="card">
       <div class="section-label">Add new user</div>
@@ -498,10 +500,11 @@ function startSession() {
     }
     const rb = el('adm-role-badge'); rb.textContent = session.role;
     rb.className = 'role-badge ' + (session.role === 'Admin' ? 'rb-admin' : 'rb-viewer');
-    // Manage tabs are Admin-only; reveal the bar and default to Manage contractors.
+    // Contractor management is its own Admin-only section now; Manage users stays a tab.
     if (session.role === 'Admin') {
+      el('adm-contractors-section').style.display = '';
       el('adm-mgmt-tabs').style.display = '';
-      switchTab('adm', 'manage-contractors');
+      switchTab('adm', 'users');
     }
     loadContractorList();
     if (session.role === 'Admin') loadUserList();
