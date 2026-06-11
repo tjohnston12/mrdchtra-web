@@ -1,0 +1,118 @@
+/* ──────────────────────────────────────────────────────────────
+   MRDC Safety — shared styles for review pages
+   Matches the design system of the main Safety app (index.html).
+   Used by review-work-zone-audits.html, review-contractor-hours.html,
+   and any future review-*.html page.
+   ────────────────────────────────────────────────────────────── */
+
+:root{
+  --blue:#1B4F8A; --blue-dark:#143C6B;
+  --orange:#E8772E; --orange-dark:#C2611F;
+  --bg:#EDF1F6; --ink:#15243B; --line:#D6DFEA; --muted:#666;
+  --soft:#E8EDF4;
+  --green:#0F6E56; --red:#A32D2D;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding:2rem 1rem}
+.wrap{width:100%;max-width:700px;margin:0 auto}
+.hidden{display:none!important}
+
+/* Headings use the serif display face, like the app */
+.hdr-title,.metric-value,.total-num{font-family:'DM Serif Display',Georgia,serif;font-weight:400}
+
+/* ── Header ── */
+.page-header{display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;padding-bottom:1.25rem;border-bottom:0.5px solid var(--line);flex-wrap:wrap}
+.hdr-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0;background:var(--blue)}
+.hdr-icon.icon-audit{background:var(--orange)}
+.hdr-title{font-size:18px}
+.hdr-sub{font-size:13px;color:var(--muted);margin-top:2px}
+.session-bar{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+.user-pill{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:99px;background:var(--soft);border:0.5px solid var(--line);font-size:12px;color:#555}
+.u-avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;background:#EAF1F9;color:var(--blue-dark)}
+.role-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:500}
+.rb-admin{background:#EAF1F9;color:var(--blue-dark)}.rb-viewer{background:#EDF0F5;color:#5E6B80}.rb-contractor{background:#FCEEE1;color:#8A4A12}
+.timer-pill{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:99px;font-size:12px;font-weight:500;background:var(--soft);border:0.5px solid var(--line);color:#555}
+.timer-pill.warn{background:#FAEEDA;border-color:#EF9F27;color:#633806}
+.back-link{display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--blue);text-decoration:none;font-weight:600;margin-bottom:1rem}
+.back-link:hover{text-decoration:underline}
+
+.expire-banner{background:#FAEEDA;border:0.5px solid #EF9F27;border-radius:8px;padding:10px 14px;margin-bottom:1.25rem;font-size:13px;color:#633806;display:none;align-items:center;gap:8px}
+.expire-banner.show{display:flex}
+
+/* ── Cards & sections ── */
+.card{background:#fff;border:0.5px solid var(--line);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:1.25rem}
+.section-label{font-size:11px;font-weight:500;color:#999;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.75rem;display:flex;align-items:center}
+
+/* ── Buttons ── */
+.btn-sm{padding:5px 12px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid #ccc;background:transparent;color:#555;display:inline-flex;align-items:center;gap:4px;transition:background 0.15s;text-decoration:none}
+.btn-sm:hover{background:var(--soft)}
+.btn-sm.danger{border-color:#F09595;color:var(--red)}.btn-sm.danger:hover{background:#FCEBEB}
+.btn-sm.blue{background:var(--blue);color:#fff;border-color:var(--blue)}.btn-sm.blue:hover{background:var(--blue-dark)}
+.btn{padding:11px 16px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;border:0.5px solid #ccc;background:transparent;color:var(--ink);transition:background 0.15s;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
+.btn:hover{background:var(--soft)}
+.btn-blue{background:var(--blue);color:#fff;border-color:var(--blue)}.btn-blue:hover{background:var(--blue-dark)}
+.btn-green{background:var(--orange-dark);color:#fff;border-color:var(--orange-dark)}.btn-green:hover{background:#8A4A12}
+.btn:disabled,.btn-blue:disabled,.btn-green:disabled{opacity:0.5;cursor:not-allowed}
+.btn-row{display:flex;gap:10px;margin-top:1.5rem}
+.btn-row .btn{flex:1}
+
+/* ── Fields ── */
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:13px;color:#555;margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:0.5px solid #ccc;border-radius:8px;font-size:14px;background:#fff;color:var(--ink);transition:border-color 0.15s;font-family:inherit}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(24,95,165,0.15)}
+.filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:0.75rem}
+.filter-grid select,.filter-grid input{width:100%;padding:8px 10px;border:0.5px solid #ccc;border-radius:8px;font-size:13px;background:#fff;color:var(--ink)}
+
+/* ── Metrics ── */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1.25rem}
+.metric{background:var(--soft);border-radius:10px;padding:1rem}
+.metric-label{font-size:12px;color:var(--muted);margin-bottom:4px}
+.metric-value{font-size:24px;color:var(--blue)}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:4px;background:var(--soft);border-radius:10px;padding:4px;margin-bottom:1.5rem}
+.tab{flex:1;padding:8px;border-radius:7px;border:none;background:transparent;font-size:13px;cursor:pointer;color:var(--muted);transition:all 0.15s}
+.tab.active{background:#fff;color:var(--ink);font-weight:500;border:0.5px solid var(--line)}
+.view{display:none}.view.active{display:block}
+
+/* ── Contractor rows ── */
+.ct-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--line)}
+.ct-row:last-child{border-bottom:none}
+.ct-av{width:34px;height:34px;border-radius:50%;background:#EAF1F9;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--blue-dark);flex-shrink:0}
+.ct-name{font-size:14px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ct-meta{font-size:12px;color:var(--muted)}
+.ct-bar-wrap{width:80px;height:6px;background:var(--bg);border-radius:3px;flex-shrink:0}
+.ct-bar{height:6px;border-radius:3px;background:#2E6DB4}
+.ct-hrs{font-size:14px;font-weight:500;color:var(--blue);flex-shrink:0}
+
+/* ── Entries table ── */
+.entries-tbl{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+.entries-tbl th{text-align:left;font-size:11px;font-weight:500;color:#999;text-transform:uppercase;letter-spacing:0.04em;padding:0 8px 8px 0;border-bottom:0.5px solid var(--line)}
+.entries-tbl td{padding:10px 8px 10px 0;border-bottom:0.5px solid var(--line);vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.entries-tbl tr:last-child td{border-bottom:none}
+.entries-tbl td:last-child{text-align:right;font-weight:500;color:var(--blue)}
+
+/* ── Badges ── */
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:500}
+.badge-zone{background:#EAF1F9;color:var(--blue-dark)}.badge-work{background:#FCEEE1;color:#8A4A12}
+
+/* ── List rows (audits) ── */
+.list-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--line)}
+.list-row:last-child{border-bottom:none}
+
+/* ── Empty + toast ── */
+.empty{text-align:center;padding:2.5rem;color:#999;font-size:13px}
+.empty i{font-size:32px;display:block;margin-bottom:8px}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#2C2C2A;color:#fff;padding:10px 22px;border-radius:8px;font-size:14px;opacity:0;transition:all 0.3s;pointer-events:none;z-index:9999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{background:var(--red)}
+
+@media(max-width:580px){
+  body{padding:1.25rem 0.75rem}
+  .session-bar{gap:6px}
+  .user-pill span:not(.role-badge){display:none}
+  .filter-grid{grid-template-columns:1fr}
+  .metrics{grid-template-columns:1fr 1fr}
+}
