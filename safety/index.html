@@ -312,73 +312,9 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
 
     </div>
   </div>
-  <div class="card" style="padding:1rem 1.25rem">
-    <div class="section-label"><i class="ti ti-filter" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>Contractor Hours filters</div>
-    <div class="filter-grid">
-      <select id="f-ct" onchange="applyFilters()"><option value="">All contractors</option></select>
-      <select id="f-zone" onchange="applyFilters()"><option value="">All zones</option></select>
-      <select id="f-month" onchange="applyFilters()"><option value="">All months</option></select>
-      <input type="text" id="f-sup" placeholder="Search supervisor..." oninput="applyFilters()"/>
-      <input type="date" id="f-from" oninput="applyFilters()"/>
-      <input type="date" id="f-to" oninput="applyFilters()"/>
-    </div>
-  </div>
-  <div id="adm-metrics" class="metrics" style="display:none">
-    <div class="metric"><div class="metric-label">Total hours</div><div class="metric-value" id="m-total">—</div></div>
-    <div class="metric"><div class="metric-label">Entries</div><div class="metric-value" id="m-entries">—</div></div>
-    <div class="metric"><div class="metric-label">Contractors</div><div class="metric-value" id="m-cts">—</div></div>
-    <div class="metric"><div class="metric-label">Zones active</div><div class="metric-value" id="m-zones">—</div></div>
-  </div>
-  <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-bottom:1rem">
-    <button class="btn-sm" onclick="loadAdminData()"><i class="ti ti-refresh" style="font-size:13px" aria-hidden="true"></i> Refresh data</button>
-  </div>
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('adm','contractors')"><i class="ti ti-users" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>By contractor</button>
-    <button class="tab" onclick="switchTab('adm','entries')"><i class="ti ti-list" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>All entries</button>
-    <button class="tab" onclick="switchTab('adm','documents')"><i class="ti ti-files" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>Documents</button>
-    <button class="tab" onclick="switchTab('adm','manage-contractors')" id="manage-contractors-tab" style="display:none"><i class="ti ti-hard-hat" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>Contractors</button>
-    <button class="tab" onclick="switchTab('adm','users')" id="users-tab" style="display:none"><i class="ti ti-key" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>Manage users</button>
-  </div>
-  <div id="adm-view-contractors" class="view active">
-    <div class="card"><div class="section-label">Hours per contractor</div><div id="adm-ct-list"><div class="empty"><i class="ti ti-users" aria-hidden="true"></i>Loading...</div></div></div>
-  </div>
-  <div id="adm-view-entries" class="view">
-    <div class="card" style="overflow-x:auto">
-      <div class="section-label">All entries</div>
-      <table class="entries-tbl">
-        <thead><tr><th style="width:22%">Contractor</th><th style="width:22%">Zone</th><th style="width:22%">Work type</th><th style="width:16%">Date</th><th style="width:12%">Supervisor</th><th style="width:6%">Hrs</th></tr></thead>
-        <tbody id="adm-entries-body"><tr><td colspan="6"><div class="empty"><i class="ti ti-table" aria-hidden="true"></i>Loading...</div></td></tr></tbody>
-      </table>
-    </div>
-  </div>
-  <div id="adm-view-documents" class="view">
-    <div class="card" style="padding:1rem 1.25rem">
-      <div class="section-label" style="margin-bottom:0.5rem">Filter by contractor</div>
-      <select id="doc-filter-ct" onchange="loadAdminDocs()" style="width:100%;padding:8px 10px;border:0.5px solid #ccc;border-radius:8px;font-size:13px;background:#fff;color:#15243B">
-        <option value="">All contractors</option>
-      </select>
-    </div>
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
-        <div class="section-label" style="margin-bottom:0">All documents</div>
-        <button class="btn-sm" onclick="loadAdminDocs()"><i class="ti ti-refresh" style="font-size:13px" aria-hidden="true"></i> Refresh</button>
-      </div>
-      <div id="adm-doc-summary" style="display:none;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem">
-        <div style="padding:8px 12px;background:#FCEEE1;border-radius:8px;border:0.5px solid #6FCF97;text-align:center">
-          <div style="font-size:20px;font-weight:500;color:#8A4A12" id="doc-count-current">0</div>
-          <div style="font-size:11px;color:#8A4A12">Current</div>
-        </div>
-        <div style="padding:8px 12px;background:#FAEEDA;border-radius:8px;border:0.5px solid #EF9F27;text-align:center">
-          <div style="font-size:20px;font-weight:500;color:#633806" id="doc-count-expiring">0</div>
-          <div style="font-size:11px;color:#633806">Expiring soon</div>
-        </div>
-        <div style="padding:8px 12px;background:#FCEBEB;border-radius:8px;border:0.5px solid #F09595;text-align:center">
-          <div style="font-size:20px;font-weight:500;color:#A32D2D" id="doc-count-expired">0</div>
-          <div style="font-size:11px;color:#A32D2D">Expired</div>
-        </div>
-      </div>
-      <div id="adm-doc-list"><div class="empty"><i class="ti ti-files" aria-hidden="true"></i>Loading...</div></div>
-    </div>
+  <div class="tabs" id="adm-mgmt-tabs" style="display:none">
+    <button class="tab" onclick="switchTab('adm','manage-contractors')" id="manage-contractors-tab"><i class="ti ti-hard-hat" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>Contractors</button>
+    <button class="tab" onclick="switchTab('adm','users')" id="users-tab"><i class="ti ti-key" style="font-size:14px;vertical-align:-2px;margin-right:3px" aria-hidden="true"></i>Manage users</button>
   </div>
 
   <div id="adm-view-manage-contractors" class="view">
@@ -488,7 +424,6 @@ const WARN_MS = 2 * 60 * 1000;
 const ACTIVITY = ['mousemove', 'keydown', 'click', 'touchstart'];
 
 let session = null, timerInterval = null, sessionExpiry = null;
-let allRecords = [], allContractors = {}, filteredRecords = [];
 
 async function api(path, options = {}) {
   const res = await fetch(`${API}${path}`, {
@@ -563,12 +498,13 @@ function startSession() {
     }
     const rb = el('adm-role-badge'); rb.textContent = session.role;
     rb.className = 'role-badge ' + (session.role === 'Admin' ? 'rb-admin' : 'rb-viewer');
-    if (session.role === 'Admin') el('users-tab').style.display = '';
-    if (session.role === 'Admin') el('manage-contractors-tab').style.display = '';
-    loadAdminData();
+    // Manage tabs are Admin-only; reveal the bar and default to Manage contractors.
+    if (session.role === 'Admin') {
+      el('adm-mgmt-tabs').style.display = '';
+      switchTab('adm', 'manage-contractors');
+    }
     loadContractorList();
     if (session.role === 'Admin') loadUserList();
-    loadAdminDocs();
     loadBoundaries();
   }
   resetTimer(session.role === 'Contractor' ? 'ct' : 'adm');
@@ -727,16 +663,19 @@ async function loadBoundaries() {
       el('ct-zone-placeholder') && (el('ct-zone-placeholder').style.display = 'none');
     }
 
-    // Populate admin filter zone dropdown
+    // (The admin contractor-hours zone filter moved to review-contractor-hours.html;
+    //  guard in case the element isn't present.)
     const fZone = el('f-zone');
-    const existing = new Set([...fZone.options].map(o => o.value));
-    boundaries.forEach(b => {
-      if (!existing.has(b.name)) {
-        const opt = document.createElement('option');
-        opt.value = b.name; opt.textContent = b.name;
-        fZone.appendChild(opt);
-      }
-    });
+    if (fZone) {
+      const existing = new Set([...fZone.options].map(o => o.value));
+      boundaries.forEach(b => {
+        if (!existing.has(b.name)) {
+          const opt = document.createElement('option');
+          opt.value = b.name; opt.textContent = b.name;
+          fZone.appendChild(opt);
+        }
+      });
+    }
   } catch (e) {
     // fallback — leave dropdown as-is
     const wrap = el('ct-zone-wrap');
@@ -840,118 +779,6 @@ function clearCtForm() {
   el('ct-monthly-card').style.display = 'none';
   el('ct-already-logged').style.display = 'none';
   populateMonthDropdown();
-}
-
-async function loadAdminData() {
-  try {
-    const hoursData = await api('/api/hours?all=true');
-    allContractors = {};
-    allRecords = hoursData.records.map(r => {
-      const name = r.fields['Contractor Name'] || 'Unknown';
-      const company = r.fields['Company'] || '';
-      const key = name + '|' + company;
-      if (!allContractors[key]) allContractors[key] = { id: key, name, company };
-      return {
-        id: r.id,
-        contractor: { id: key, name, company },
-        zone: r.fields['Zone / Section'] || '',
-        workType: r.fields['Work Type'] || '',
-        supervisor: r.fields['Supervisor'] || '',
-        date: r.fields['Date'] || '',
-        month: r.fields['Month'] || '',
-        hours: parseFloat(r.fields['Hours']) || 0
-      };
-    });
-    populateAdminFilters(); applyFilters();
-    el('adm-metrics').style.display = '';
-    populateDocFilterDropdown();
-    showToast('Data loaded — ' + allRecords.length + ' entries');
-  } catch (e) { showToast(e.message || 'Failed to load', true); }
-}
-
-function populateAdminFilters() {
-  const fCt = el('f-ct'); const existing = new Set([...fCt.options].map(o => o.value));
-  Object.values(allContractors).forEach(c => {
-    if (!existing.has(c.id)) {
-      const o = document.createElement('option');
-      o.value = c.id;
-      o.textContent = c.name + (c.company ? ' — ' + c.company : '');
-      fCt.appendChild(o);
-    }
-  });
-  const months = new Set(allRecords.map(r => r.date.slice(0, 7)).filter(Boolean));
-  const fM = el('f-month'); const existingM = new Set([...fM.options].map(o => o.value));
-  [...months].sort().reverse().forEach(m => { if (!existingM.has(m)) { const o = document.createElement('option'); o.value = m; const [y, mo] = m.split('-'); const mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; o.textContent = mn[parseInt(mo) - 1] + ' ' + y; fM.appendChild(o); } });
-}
-
-function applyFilters() {
-  const ctF = v('f-ct'), zoneF = v('f-zone'), monthF = v('f-month'), supF = v('f-sup').toLowerCase(), fromF = v('f-from'), toF = v('f-to');
-  filteredRecords = allRecords.filter(r => {
-    if (ctF && r.contractor.id !== ctF) return false;
-    if (zoneF && r.zone !== zoneF) return false;
-    if (monthF && !r.date.startsWith(monthF)) return false;
-    if (supF && !r.supervisor.toLowerCase().includes(supF)) return false;
-    if (fromF && r.date < fromF) return false;
-    if (toF && r.date > toF) return false;
-    return true;
-  });
-  renderAdmin();
-}
-
-function renderAdmin() {
-  const total = filteredRecords.reduce((s, r) => s + r.hours, 0);
-  const ctSet = new Set(filteredRecords.map(r => r.contractor.id));
-  const zoneSet = new Set(filteredRecords.map(r => r.zone).filter(Boolean));
-  el('m-total').textContent = total.toFixed(1); el('m-entries').textContent = filteredRecords.length;
-  el('m-cts').textContent = ctSet.size; el('m-zones').textContent = zoneSet.size;
-  renderAdmContractors(); renderAdmEntries();
-}
-
-function renderAdmContractors() {
-  const listEl = el('adm-ct-list');
-  if (!filteredRecords.length) { listEl.innerHTML = '<div class="empty"><i class="ti ti-users"></i>No data for current filters</div>'; return; }
-  const map = {};
-  filteredRecords.forEach(r => {
-    const k = r.contractor.id;
-    if (!map[k]) map[k] = { ...r.contractor, hours: 0, entries: 0, months: {} };
-    map[k].hours += r.hours;
-    map[k].entries++;
-    if (r.month) map[k].months[r.month] = (map[k].months[r.month] || 0) + r.hours;
-  });
-  const sorted = Object.values(map).sort((a, b) => b.hours - a.hours);
-  const max = sorted[0]?.hours || 1;
-  listEl.innerHTML = sorted.map(c => {
-    const ini = (c.name || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
-    const pct = Math.round((c.hours / max) * 100);
-    const monthList = Object.entries(c.months).sort((a,b) => a[0].localeCompare(b[0])).map(([m, h]) =>
-      `<span style="font-size:11px;background:#E8EDF4;border:0.5px solid #D6DFEA;border-radius:99px;padding:1px 7px;color:#555">${m}: ${h.toFixed(1)} hrs</span>`
-    ).join(' ');
-    return `<div class="ct-row">
-      <div class="ct-av">${ini}</div>
-      <div style="flex:1;min-width:0">
-        <div class="ct-name">${c.name}</div>
-        <div class="ct-meta">${c.company || '—'} · ${c.entries} entr${c.entries === 1 ? 'y' : 'ies'}</div>
-        ${monthList ? `<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px">${monthList}</div>` : ''}
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
-        <div class="ct-hrs">${c.hours.toFixed(1)} hrs</div>
-        <div class="ct-bar-wrap"><div class="ct-bar" style="width:${pct}%"></div></div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function renderAdmEntries() {
-  const tbody = el('adm-entries-body');
-  if (!filteredRecords.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><i class="ti ti-table"></i>No data</div></td></tr>'; return; }
-  tbody.innerHTML = [...filteredRecords].sort((a, b) => b.date.localeCompare(a.date)).map(r => `<tr>
-    <td title="${r.contractor.name}">${r.contractor.name}</td>
-    <td><span class="badge badge-zone">${r.zone.split('—')[0].trim()}</span></td>
-    <td><span class="badge badge-work" title="${r.workType}">${r.workType.length > 14 ? r.workType.slice(0, 13) + '…' : r.workType}</span></td>
-    <td>${r.date}</td>
-    <td title="${r.supervisor}">${r.supervisor.length > 10 ? r.supervisor.slice(0, 9) + '…' : r.supervisor}</td>
-    <td>${r.hours.toFixed(1)}</td>
-  </tr>`).join('');
 }
 
 // ── CONTRACTOR MANAGEMENT ──
@@ -1224,80 +1051,6 @@ async function loadCtDocHistory() {
   } catch (e) {
     listEl.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Could not load documents</div>';
   }
-}
-
-async function loadAdminDocs() {
-  const listEl = el('adm-doc-list');
-  listEl.innerHTML = '<div class="empty"><i class="ti ti-loader"></i>Loading...</div>';
-  const ctFilter = el('doc-filter-ct') ? el('doc-filter-ct').value : '';
-  try {
-    const url = ctFilter ? `/api/documents?contractorId=${ctFilter}` : '/api/documents?all=true';
-    const data = await api(url);
-    if (!data.records || !data.records.length) {
-      listEl.innerHTML = '<div class="empty"><i class="ti ti-files"></i>No documents uploaded yet</div>';
-      return;
-    }
-    // Group by contractor
-    const grouped = {};
-    data.records.forEach(r => {
-      const f = r.fields;
-      const key = f['Contractor Name'] || f['Contractor ID'] || 'Unknown';
-      if (!grouped[key]) grouped[key] = { company: f['Company'] || '', docs: [] };
-      grouped[key].docs.push(f);
-    });
-    // Tally status counts
-    let current = 0, expiring = 0, expired = 0;
-    data.records.forEach(r => {
-      const s = getDocStatus(r.fields['Uploaded At']);
-      if (!s) return;
-      if (s.days < 0) expired++;
-      else if (s.days <= 30) expiring++;
-      else current++;
-    });
-    const summary = el('adm-doc-summary');
-    if (summary) {
-      summary.style.display = 'grid';
-      el('doc-count-current').textContent = current;
-      el('doc-count-expiring').textContent = expiring;
-      el('doc-count-expired').textContent = expired;
-    }
-
-    listEl.innerHTML = Object.entries(grouped).map(([name, val]) => `
-      <div style="margin-bottom:1rem">
-        <div style="font-size:13px;font-weight:500;margin-bottom:6px;padding-bottom:6px;border-bottom:0.5px solid #D6DFEA">
-          ${name} <span style="font-size:12px;color:#666;font-weight:400">${val.company ? '— '+val.company : ''}</span>
-        </div>
-        ${val.docs.map(f => {
-          const date = f['Uploaded At'] ? new Date(f['Uploaded At']).toLocaleDateString() : '—';
-          const size = f['File Size'] ? (f['File Size']/1024).toFixed(0)+' KB' : '';
-          return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px;flex-wrap:wrap">
-            <i class="ti ti-file" style="font-size:16px;color:#1B4F8A;flex-shrink:0"></i>
-            <div style="flex:1;min-width:0">
-              <div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f['Document Label']||f['Document Slot']||'—'}</div>
-              <div style="font-size:12px;color:#666;margin-bottom:3px">${f['File Name']||'—'} · ${size} · ${date}</div>
-              ${statusBadge(f['Uploaded At'])}
-            </div>
-            <a href="${f['File URL']}" target="_blank" class="btn-sm" style="flex-shrink:0"><i class="ti ti-download" style="font-size:13px"></i> Download</a>
-          </div>`;
-        }).join('')}
-      </div>
-    `).join('');
-  } catch (e) {
-    listEl.innerHTML = '<div class="empty"><i class="ti ti-alert-circle"></i>Could not load documents</div>';
-  }
-}
-
-function populateDocFilterDropdown() {
-  const sel = el('doc-filter-ct');
-  if (!sel) return;
-  const existing = new Set([...sel.options].map(o => o.value));
-  Object.values(allContractors).forEach(c => {
-    if (!existing.has(c.id)) {
-      const o = document.createElement('option');
-      o.value = c.id; o.textContent = c.name + (c.company ? ' — '+c.company : '');
-      sel.appendChild(o);
-    }
-  });
 }
 
 function showErr(msg) { el('err-txt').textContent = msg; el('err-msg').classList.add('show'); }
