@@ -507,6 +507,8 @@ async function doLogin() {
     session = { ...data.user, token: data.token, expiresAt: data.expiresAt };
     // Hand the signed-in identity to the Work Zone Audit form (separate page, same origin).
     try { localStorage.setItem('mrdc_safety_auditor', JSON.stringify({ name: session.name || '', email: session.email || '', exp: session.expiresAt || 0 })); } catch (_) {}
+    // Hand the FULL session to the review pages (safety-shell.js reads { s, exp } from sessionStorage).
+    try { sessionStorage.setItem('mrdc_safety_session', JSON.stringify({ s: session, exp: (session.expiresAt && session.expiresAt > 1e12 ? session.expiresAt : Date.now() + TIMEOUT_MS) })); } catch (_) {}
     hideErr(); el('inp-pw').value = '';
     startSession();
   } catch (e) {
@@ -579,6 +581,7 @@ function tickTimer(prefix) {
 function expireSession() {
   clearInterval(timerInterval); ACTIVITY.forEach(e => document.removeEventListener(e, activityHandler)); session = null;
   try { localStorage.removeItem('mrdc_safety_auditor'); } catch (_) {}
+  try { sessionStorage.removeItem('mrdc_safety_session'); } catch (_) {}
   el('contractor-shell').classList.add('hidden'); el('admin-shell').classList.add('hidden');
   el('login-shell').classList.remove('hidden'); el('inp-pw').value = '';
   el('login-btn').disabled = false; el('login-btn').innerHTML = '<i class="ti ti-login"></i> Sign in';
@@ -588,6 +591,7 @@ function expireSession() {
 function doLogout() {
   clearInterval(timerInterval); ACTIVITY.forEach(e => document.removeEventListener(e, activityHandler)); session = null;
   try { localStorage.removeItem('mrdc_safety_auditor'); } catch (_) {}
+  try { sessionStorage.removeItem('mrdc_safety_session'); } catch (_) {}
   el('contractor-shell').classList.add('hidden'); el('admin-shell').classList.add('hidden');
   el('login-shell').classList.remove('hidden'); el('inp-user').value = ''; el('inp-pw').value = '';
   hideErr(); showToast('Signed out successfully');
@@ -1384,6 +1388,31 @@ async function removeUser(id, name) {
     renderUserList();
     showToast(name + ' removed');
   } catch (e) { showToast(e.message || 'Failed to remove user', true); }
+}
+
+// ── Restore an existing signed-in session on page load, so returning to the
+//    dashboard (e.g. the audit form's "Safety Home" button, or coming back
+//    from a review page) does not force a re-login. Uses the same
+//    sessionStorage key the review pages read, and refreshes the window.
+function restoreSession() {
+  let raw = null;
+  try { raw = sessionStorage.getItem('mrdc_safety_session'); } catch (_) { return; }
+  if (!raw) return;
+  let o = null;
+  try { o = JSON.parse(raw); } catch (_) { o = null; }
+  if (!o || !o.s || !o.exp || Date.now() >= o.exp) {
+    try { sessionStorage.removeItem('mrdc_safety_session'); } catch (_) {}
+    return;
+  }
+  session = o.s;
+  sessionExpiry = Date.now() + TIMEOUT_MS;
+  try { sessionStorage.setItem('mrdc_safety_session', JSON.stringify({ s: session, exp: sessionExpiry })); } catch (_) {}
+  startSession();
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', restoreSession);
+} else {
+  restoreSession();
 }
 </script>
 </body>
